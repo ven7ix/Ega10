@@ -2,45 +2,6 @@
 
 namespace Ega10
 {
-    internal static class Reproduction
-    {
-        public static List<Applicant> ReproduceRANDOM(List<Applicant> population)
-        {
-            List<Applicant> children = new(population.Count);
-
-            for (int i = 0; i < population.Count; i += 2)
-            {
-                int firstParentID = Tools.Random.Next(0, population.Count);
-                Applicant firstParent = new(EncodePermutation(population[firstParentID].Genes));
-                //Applicant firstParent = Population[firstParentID];
-                population.RemoveAt(firstParentID);
-
-                int secondParentID = Tools.Random.Next(0, population.Count);
-                Applicant secondParent = new(EncodePermutation(population[secondParentID].Genes));
-                //Applicant secondParent = Population[secondParentID];
-                population.RemoveAt(secondParentID);
-
-                children = [.. children, .. Crossover.CrossoverORDINAL(firstParent, secondParent)];
-            }
-
-            return children;
-        }
-
-        public static List<Applicant> ReproductionINBREEDING(List<Applicant> population)
-        {
-            List<Applicant> children = new(population.Count);
-
-            return children;
-        }
-
-        public static List<Applicant> ReproductionOUTBREEDING(List<Applicant> population)
-        {
-            List<Applicant> children = new(population.Count);
-
-            return children;
-        }
-    }
-
     internal static class Crossover
     {
         public static List<int[]> ListAllCycles(int[] permutationIndices, int[] permutationValues)
@@ -108,6 +69,18 @@ namespace Ega10
                     continue;
 
                 children.Add(new Applicant(childGenes));
+            }
+
+            return children;
+        }
+
+        public static List<Applicant> OrgyCYCLIC(List<Tuple<Applicant, Applicant>> parentPairs)
+        {
+            List<Applicant> children = [];
+
+            foreach (var pair in parentPairs)
+            {
+                children = [.. children, .. CrossoverCYCLIC(pair.Item1, pair.Item2)];
             }
 
             return children;
@@ -188,13 +161,25 @@ namespace Ega10
             {
                 int[] childGenes = childrenGenes[c];
 
-                if (childGenes.SequenceEqual(firstParent.Genes) || childGenes.SequenceEqual(secondParent.Genes))
-                    continue;
+                //if (childGenes.SequenceEqual(firstParent.Genes) || childGenes.SequenceEqual(secondParent.Genes))
+                //    continue;
 
-                if (AlreadyHaveTheseGenes(children, childGenes))
-                    continue;
+                //if (AlreadyHaveTheseGenes(children, childGenes))
+                //    continue;
 
                 children.Add(new Applicant(childGenes));
+            }
+
+            return children;
+        }
+
+        public static List<Applicant> OrgyORDINAL(List<Tuple<Applicant, Applicant>> parentPairs)
+        {
+            List<Applicant> children = [];
+
+            foreach (var pair in parentPairs)
+            {
+                children = [.. children, .. CrossoverORDINAL(pair.Item1, pair.Item2)];
             }
 
             return children;

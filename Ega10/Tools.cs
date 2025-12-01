@@ -46,8 +46,20 @@
         }
 
 
-        public static Random Random { get; } = new(1);
+        public static Random Random { get; } = new();
 
+
+        public static int DistanceBetweenPermutations(int[] a, int[] b)
+        {
+            int distance = 0;
+
+            for (int i = 0; i < a.Length; i++)
+            {
+                distance += Math.Abs(a[i] - b[i]);
+            }
+
+            return distance;
+        }
 
         public static string GetLongBinar(int number, int bitsToRepresent)
         {

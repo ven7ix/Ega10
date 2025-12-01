@@ -29,13 +29,34 @@ namespace Ega10
 
             Population = InitialPopulation.GenerateHEURISTICS(PopulationSize, Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers);
 
-            for (int i = 0; i < 100000; i++)
+            _ = int.TryParse(Console.ReadLine(), out int choice);
+
+            for (int i = 0; i < 100; i++)
             {
-                Population = NewPopulation.GenerateRANDOM(Evaluation.EvaluatePENALTY(Mutation.MutateDONT(Reproduction.ReproduceRANDOM(Population)), Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers), PopulationSize);
+                if (choice == 0)
+                    Population = 
+                        NewPopulation.GenerateRANDOM(
+                            Evaluation.EvaluatePENALTY(
+                                Mutation.MutateDONT(
+                                    Crossover.OrgyORDINAL(
+                                        Parents.PickRANDOM(Population))),
+                                Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers),
+                            PopulationSize);
+                else
+                    Population =
+                        NewPopulation.GenerateRANDOM(
+                            Evaluation.EvaluatePENALTY(
+                                Mutation.MutateDONT(
+                                    Parents.PickRANDOM_OLD(Population)),
+                                Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers),
+                            PopulationSize);
+
+                //I have no fucking idea why they produce different results
+                //And I need to solve the problem of global extinction
 
                 if (Population.Count < 1)
                     break;
-                 
+                
                 EvaluatedApplicant currentApplicant = Evaluation.EvaluateApplicantPENALTY(Population[0], Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers);
 
                 if (currentApplicant.Value < Best.Value)
