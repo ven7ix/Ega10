@@ -4,10 +4,10 @@ namespace Ega10
 {
     internal static class Solution
     {
-        public static int Applications { get; } = 15;
-        public static int Machines { get; } = 5;
-        public static int[] PenaltyMultiplyers { get; } = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-        public static int[][] ExecutionTimes { get; } =
+        private static int Applications { get; } = 15;
+        private static int Machines { get; } = 5;
+        private static int[] PenaltyMultiplyers { get; } = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+        private static int[][] ExecutionTimes { get; } =
             [
             [ 3, 13,  7, 15,  5,  5,  3, 17, 13,  3,  1,  3,  4,  4,  9],
             [23,  9, 11,  8, 11, 22, 10, 15,  4,  6,  5,  5,  7,  9, 10],
@@ -15,11 +15,11 @@ namespace Ega10
             [ 4, 15,  1,  1, 12,  1,  7, 24, 19, 24,  9, 12, 20, 11,  6],
             [ 5, 16,  1, 17, 23,  5,  7,  9,  4, 16, 22, 20, 16, 22,  2]
             ]; //сколько выполнятеся работа (столбец) на станке (строка)
-        public static int[] DueTimes { get; } = [20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90];
+        private static int[] DueTimes { get; } = [20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90];
 
-        public static int PopulationSize { get; } = 200;
-        public static List<Applicant> Population { get; set; } = [];
-        public static EvaluatedApplicant Best { get; set; } = new([], int.MaxValue);
+        private static int PopulationSize { get; } = 200;
+        private static List<Applicant> Population { get; set; } = [];
+        private static EvaluatedApplicant Best { get; set; } = new([], int.MaxValue);
 
         public static void Solve()
         {
@@ -29,12 +29,12 @@ namespace Ega10
             
             for (int i = 0, iterationsWithSameBest = 0; i < 1000 && iterationsWithSameBest < 1000; i++, iterationsWithSameBest++) //2
             {
-                Population = 
+                Population =
                     NewPopulation.GenerateBESTCHILDREN(
                         Evaluation.EvaluatePENALTY(
-                            HandlingRestrictions.MODIFY(
-                                Mutation.MutateRANDOM(
-                                    Crossover.OrgyORDINAL(
+                            HandlingRestrictions.KILLSAME(
+                                Mutation.MutateDONT(
+                                    Crossover.OrgyCYCLIC(
                                         Parents.PickRANDOM(Population)))),
                                 Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers),
                             PopulationSize);

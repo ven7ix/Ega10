@@ -15,11 +15,13 @@ namespace Ega10
             for (int i = 0; i < parentPairsAmount; i++)
             {
                 int firstParentID = Tools.Random.Next(0, population.Count);
-                Applicant firstParent = new(EncodePermutation(population[firstParentID].Genes));
+                //Applicant firstParent = new(EncodePermutation(population[firstParentID].Genes));
+                Applicant firstParent = new(population[firstParentID].Genes);
                 population.RemoveAt(firstParentID);
 
                 int secondParentID = Tools.Random.Next(0, population.Count);
-                Applicant secondParent = new(EncodePermutation(population[secondParentID].Genes));
+                //Applicant secondParent = new(EncodePermutation(population[secondParentID].Genes));
+                Applicant secondParent = new(population[secondParentID].Genes);
                 population.RemoveAt(secondParentID);
 
                 parentPairs.Add(new Tuple<Applicant, Applicant>(firstParent, secondParent));

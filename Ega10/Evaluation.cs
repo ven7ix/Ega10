@@ -40,7 +40,8 @@ namespace Ega10
 
             foreach (Applicant applicant in applicants)
             {
-                evaluatedApplicant.Add(EvaluateApplicantPENALTY(new Applicant(DecodePermutation(applicant.Genes)), applications, machines, executionTimes, dueTimes, penaltyMultiplyers));
+                //evaluatedApplicant.Add(EvaluateApplicantPENALTY(new Applicant(DecodePermutation(applicant.Genes)), applications, machines, executionTimes, dueTimes, penaltyMultiplyers));
+                evaluatedApplicant.Add(EvaluateApplicantPENALTY(new Applicant(applicant.Genes), applications, machines, executionTimes, dueTimes, penaltyMultiplyers));
             }
 
             evaluatedApplicant.Sort();

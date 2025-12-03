@@ -2,7 +2,7 @@
 
 namespace Ega10
 {
-    internal static class Mutation //2
+    internal static class Mutation //3
     {
         public static List<Applicant> MutateDONT(List<Applicant> children)
         {
@@ -55,6 +55,17 @@ namespace Ega10
         public static List<Applicant> MutateCOMPLEMENT(List<Applicant> children)
         {
             List<Applicant> mutatedChildren = [];
+            
+            foreach (Applicant child in children)
+            {
+                for (int gen = 0; gen < child.Genes.Length; gen++)
+                {
+                    if (Tools.Random.Next(0, 2) == 0)
+                        child.Genes[gen] = child.Genes.Length - child.Genes[gen];
+
+                    mutatedChildren.Add(child);
+                }
+            }
 
             return mutatedChildren;
         }

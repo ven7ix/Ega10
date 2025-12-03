@@ -49,7 +49,7 @@ namespace Ega10
         }
 
 
-        public static void GenerateOrdering(IndexValuePair[] ordering, ref double orderingSum, int applications, int machines, int[][] executionTimes, int[] dueTimes, int[] penaltyMultiplyers)
+        private static void GenerateOrdering(IndexValuePair[] ordering, ref double orderingSum, int applications, int machines, int[][] executionTimes, int[] dueTimes, int[] penaltyMultiplyers)
         {
             for (int a = 0; a < applications; a++)
             {
@@ -71,7 +71,7 @@ namespace Ega10
             }
         }
 
-        public static IndexValuePair PopApplication(IndexValuePair[] ordering, ref double orderingSum, int applications)
+        private static IndexValuePair PopApplication(IndexValuePair[] ordering, ref double orderingSum, int applications)
         {
             double xi = Tools.Random.Next(1, (int)orderingSum + 1);
             double sum = 0;
@@ -91,7 +91,7 @@ namespace Ega10
             return new(-1, int.MinValue);
         }
 
-        public static Applicant GenerateApplicant(IndexValuePair[] ordering, double orderingSum, int applications, int machines, int[][] executionTimes, int[] dueTimes, int[] penaltyMultiplyers)
+        private static Applicant GenerateApplicant(IndexValuePair[] ordering, double orderingSum, int applications, int machines, int[][] executionTimes, int[] dueTimes, int[] penaltyMultiplyers)
         {
             IndexValuePair[] applicantOrdering = new IndexValuePair[ordering.Length];
             Array.Copy(ordering, applicantOrdering, ordering.Length);

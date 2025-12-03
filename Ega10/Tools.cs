@@ -34,7 +34,14 @@ namespace Ega10
 
             public override readonly string ToString()
             {
-                return $"{Value}: {ArrayToString(Genes)}";
+                string arrayString = string.Empty;
+
+                for (int i = 0; i < Genes.Length; i++)
+                {
+                    arrayString += $"{(Genes[i] < 10 ? ' ' : string.Empty)}{Genes[i]} ";
+                }
+
+                return $"{Value}: {arrayString}";
             }
         }
 
@@ -44,7 +51,14 @@ namespace Ega10
 
             public override readonly string ToString()
             {
-                return $"{ArrayToString(Genes)}";
+                string arrayString = string.Empty;
+
+                for (int i = 0; i < Genes.Length; i++)
+                {
+                    arrayString += $"{(Genes[i] < 10 ? ' ' : string.Empty)}{Genes[i]} ";
+                }
+
+                return arrayString;
             }
 
             public override readonly bool Equals([NotNullWhen(true)] object? obj)
@@ -77,33 +91,6 @@ namespace Ega10
             }
 
             return distance;
-        }
-
-        public static string GetLongBinar(int number, int bitsToRepresent)
-        {
-            string shortBase2 = Convert.ToString(number, toBase: 2);
-            string longBase2 = string.Empty;
-
-            int shortBase2Length = shortBase2.Length;
-
-            if (shortBase2Length < bitsToRepresent)
-            {
-                for (int i = 0; i < bitsToRepresent - shortBase2Length; i++)
-                    longBase2 += '0';
-            }
-
-            return longBase2 + shortBase2;
-        }
-
-        public static bool AlreadyHaveTheseGenes(List<Applicant> applicants, int[] genes)
-        {
-            foreach (Applicant applicant in applicants)
-            {
-                if (genes.SequenceEqual(applicant.Genes))
-                    return true;
-            }
-
-            return false;
         }
 
         public static void PrintCycles(List<int[]> permutationCycles)

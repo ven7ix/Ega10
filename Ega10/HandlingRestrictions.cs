@@ -10,7 +10,7 @@ namespace Ega10
         }
 
 
-        public static Applicant ApplicantMODIFY(Applicant applicant)
+        private static Applicant ApplicantMODIFY(Applicant applicant)
         {
             int[] genes = DecodePermutation(applicant.Genes);
             List<int> uniqueGenes = [];

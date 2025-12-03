@@ -4,7 +4,7 @@ namespace Ega10
 {
     internal static class Crossover //2
     {
-        public static List<int[]> ListAllCycles(int[] permutationIndices, int[] permutationValues)
+        private static List<int[]> ListAllCycles(int[] permutationIndices, int[] permutationValues)
         {
             int permutationLength = permutationIndices.Length;
 
@@ -39,7 +39,7 @@ namespace Ega10
             return permutationCycles;
         }
 
-        public static List<Applicant> CrossoverCYCLIC(Applicant firstParent, Applicant secondParent)
+        private static List<Applicant> CrossoverCYCLIC(Applicant firstParent, Applicant secondParent)
         {
             List<int[]> permutationCycles = ListAllCycles(firstParent.Genes, secondParent.Genes);
 
@@ -50,11 +50,9 @@ namespace Ega10
             {
                 int[] childGenes = new int[firstParent.Genes.Length];
 
-                string childIDBinar = GetLongBinar(c, permutationCycles.Count);
-
                 for (int p = 0; p < permutationCycles.Count; p++)
                 {
-                    int[] parentGenes = childIDBinar[p] == '0' ? firstParent.Genes : secondParent.Genes;
+                    int[] parentGenes = ((c >> p) & 1) == 1 ? firstParent.Genes : secondParent.Genes;
 
                     for (int gen = 0; gen < parentGenes.Length; gen++)
                     {
@@ -84,7 +82,7 @@ namespace Ega10
         }
 
 
-        public static int[] GenerateCuts(int genesAmount)
+        private static int[] GenerateCuts(int genesAmount)
         {
             int cutsAmount = Tools.Random.Next(1, 5);
 
@@ -101,7 +99,7 @@ namespace Ega10
             return cuts;
         }
 
-        public static List<int[]> GenerateCutCombinations(int[] arrayA, int[] arrayB, int[] cuts)
+        private static List<int[]> GenerateCutCombinations(int[] arrayA, int[] arrayB, int[] cuts)
         {
             int n = arrayA.Length;
             List<int[]> result = [];
@@ -146,7 +144,7 @@ namespace Ega10
             return result;
         }
 
-        public static List<Applicant> CrossoverORDINAL(Applicant firstParent, Applicant secondParent)
+        private static List<Applicant> CrossoverORDINAL(Applicant firstParent, Applicant secondParent)
         {
             int genesAmount = firstParent.Genes.Length;
 
