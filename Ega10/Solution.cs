@@ -25,34 +25,19 @@ namespace Ega10
         {
             PrintInitialConditions(Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers);
 
-            //GenerateInitialPopulationRANDOM(PopulationSize, Applications);
-
             Population = InitialPopulation.GenerateHEURISTICS(PopulationSize, Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers);
 
-            _ = int.TryParse(Console.ReadLine(), out int choice);
-
-            for (int i = 0; i < 100; i++)
+            for (int i = 0, iterationsWithSameBest = 0; i < 1000 && iterationsWithSameBest < 1000; i++, iterationsWithSameBest++)
             {
-                if (choice == 0)
-                    Population = 
-                        NewPopulation.GenerateRANDOM(
-                            Evaluation.EvaluatePENALTY(
-                                Mutation.MutateDONT(
+                Population = 
+                    NewPopulation.GenerateRANDOM(
+                        Evaluation.EvaluatePENALTY(
+                            HandlingRestrictions.MODIFY(
+                                Mutation.MutateRANDOM(
                                     Crossover.OrgyORDINAL(
-                                        Parents.PickRANDOM(Population))),
+                                        Parents.PickRANDOM(Population)))),
                                 Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers),
                             PopulationSize);
-                else
-                    Population =
-                        NewPopulation.GenerateRANDOM(
-                            Evaluation.EvaluatePENALTY(
-                                Mutation.MutateDONT(
-                                    Parents.PickRANDOM_OLD(Population)),
-                                Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers),
-                            PopulationSize);
-
-                //I have no fucking idea why they produce different results
-                //And I need to solve the problem of global extinction
 
                 if (Population.Count < 1)
                     break;
@@ -63,6 +48,7 @@ namespace Ega10
                 {
                     Best = currentApplicant;
                     Console.WriteLine(Best);
+                    iterationsWithSameBest = 0;
                 }
             }
         }

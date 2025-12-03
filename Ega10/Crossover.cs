@@ -65,9 +65,6 @@ namespace Ega10
                 if (childGenes.SequenceEqual(firstParent.Genes) || childGenes.SequenceEqual(secondParent.Genes))
                     continue;
 
-                if (AlreadyHaveTheseGenes(children, childGenes))
-                    continue;
-
                 children.Add(new Applicant(childGenes));
             }
 
@@ -161,11 +158,8 @@ namespace Ega10
             {
                 int[] childGenes = childrenGenes[c];
 
-                //if (childGenes.SequenceEqual(firstParent.Genes) || childGenes.SequenceEqual(secondParent.Genes))
-                //    continue;
-
-                //if (AlreadyHaveTheseGenes(children, childGenes))
-                //    continue;
+                if (childGenes.SequenceEqual(firstParent.Genes) || childGenes.SequenceEqual(secondParent.Genes))
+                    continue;
 
                 children.Add(new Applicant(childGenes));
             }

@@ -1,4 +1,7 @@
-﻿namespace Ega10
+﻿using System.Collections;
+using System.Diagnostics.CodeAnalysis;
+
+namespace Ega10
 {
     internal static class Tools
     {
@@ -43,10 +46,25 @@
             {
                 return $"{ArrayToString(Genes)}";
             }
+
+            public override readonly bool Equals([NotNullWhen(true)] object? obj)
+            {
+                if (obj is Applicant applicant)
+                {
+                    return Genes.SequenceEqual(applicant.Genes);
+                }
+
+                throw new ArgumentException("Inccorect type comparason");
+            }
+
+            public override readonly int GetHashCode()
+            {
+                return ((IStructuralEquatable)Genes).GetHashCode(EqualityComparer<int>.Default);
+            }
         }
 
 
-        public static Random Random { get; } = new();
+        public static Random Random { get; } = new(0);
 
 
         public static int DistanceBetweenPermutations(int[] a, int[] b)
@@ -206,6 +224,17 @@
             }
 
             return decodedPermutation;
+        }
+
+        public static bool RightPemutation(int[] permutation)
+        {
+            for (int i = 0; i < permutation.Length; i++)
+            {
+                if (!permutation.Contains(i))
+                    return false;
+            }
+
+            return true;
         }
     }
 }

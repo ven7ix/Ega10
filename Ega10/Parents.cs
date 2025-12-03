@@ -7,28 +7,6 @@ namespace Ega10
         private const int MaxDistance = 40;
         private const int MinDistance = 40;
 
-        [Obsolete]
-        public static List<Applicant> PickRANDOM_OLD(List<Applicant> population)
-        {
-            int parentPairsAmount = population.Count / 2;
-            List<Applicant> children = new(parentPairsAmount);
-
-            for (int i = 0; i < parentPairsAmount; i++)
-            {
-                int firstParentID = Tools.Random.Next(0, population.Count);
-                Applicant firstParent = new(EncodePermutation(population[firstParentID].Genes));
-                population.RemoveAt(firstParentID);
-
-                int secondParentID = Tools.Random.Next(0, population.Count);
-                Applicant secondParent = new(EncodePermutation(population[secondParentID].Genes));
-                population.RemoveAt(secondParentID);
-
-                children = [.. children, .. Crossover.CrossoverORDINAL(firstParent, secondParent)];
-            }
-
-            return children;
-        }
-
         public static List<Tuple<Applicant, Applicant>> PickRANDOM(List<Applicant> population)
         {
             int parentPairsAmount = population.Count / 2;
