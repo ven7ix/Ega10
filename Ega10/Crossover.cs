@@ -2,7 +2,7 @@
 
 namespace Ega10
 {
-    internal static class Crossover
+    internal static class Crossover //2
     {
         public static List<int[]> ListAllCycles(int[] permutationIndices, int[] permutationValues)
         {

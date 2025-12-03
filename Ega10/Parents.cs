@@ -2,7 +2,7 @@
 
 namespace Ega10
 {
-    internal static class Parents
+    internal static class Parents //5
     {
         private const int MaxDistance = 40;
         private const int MinDistance = 40;
@@ -104,6 +104,14 @@ namespace Ega10
 
                 parentPairs.Add(new Tuple<Applicant, Applicant>(firstParent, TryGetPartnerOUTBREEDING(population, firstParent, minDistance)));
             }
+
+            return parentPairs;
+        }
+
+
+        public static List<Tuple<Applicant, Applicant>> PickPOSITIVE(List<Applicant> population)
+        {
+            List<Tuple<Applicant, Applicant>> parentPairs = [];
 
             return parentPairs;
         }

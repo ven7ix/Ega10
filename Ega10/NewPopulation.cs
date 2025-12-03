@@ -2,9 +2,9 @@
 
 namespace Ega10
 {
-    internal static class NewPopulation
+    internal static class NewPopulation //1
     {
-        public static List<Applicant> GenerateRANDOM(List<EvaluatedApplicant> children, int populationSize)
+        public static List<Applicant> GenerateBESTCHILDREN(List<EvaluatedApplicant> children, int populationSize)
         {
             int newPopulationSize = Math.Min(children.Count, populationSize);
 

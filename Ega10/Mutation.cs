@@ -2,7 +2,7 @@
 
 namespace Ega10
 {
-    internal static class Mutation
+    internal static class Mutation //2
     {
         public static List<Applicant> MutateDONT(List<Applicant> children)
         {
@@ -48,6 +48,13 @@ namespace Ega10
 
                 mutatedChildren.Add(child);
             }
+
+            return mutatedChildren;
+        }
+
+        public static List<Applicant> MutateCOMPLEMENT(List<Applicant> children)
+        {
+            List<Applicant> mutatedChildren = [];
 
             return mutatedChildren;
         }

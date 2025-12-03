@@ -1,8 +1,9 @@
-﻿using static Ega10.Tools;
+﻿using System;
+using static Ega10.Tools;
 
 namespace Ega10
 {
-    internal static class InitialPopulation
+    internal static class InitialPopulation //6
     {
         public static List<Applicant> GenerateRANDOM(int populationSize, int applications)
         {
@@ -10,12 +11,27 @@ namespace Ega10
 
             for (int applicant = 0; applicant < populationSize; applicant++)
             {
-                List<int> applicationIDs = new(applications);
+                int[] applicantGenes = new int[applications];
+
                 for (int a = 0; a < applications; a++)
                 {
-                    applicationIDs.Add(a);
+                    applicantGenes[a] = Tools.Random.Next(0, applications);
                 }
 
+                initialPopulation.Add(new Applicant(applicantGenes));
+            }
+
+            return initialPopulation;
+        }
+
+
+        public static List<Applicant> GenerateRANDOMCONTROL(int populationSize, int applications)
+        {
+            List<Applicant> initialPopulation = [];
+
+            for (int applicant = 0; applicant < populationSize; applicant++)
+            {
+                List<int> applicationIDs = [.. Enumerable.Range(0, applications)];
                 int[] applicantGenes = new int[applications];
 
                 for (int a = 0; a < applications; a++)
@@ -25,6 +41,7 @@ namespace Ega10
 
                     applicantGenes[a] = applicationID;
                 }
+
                 initialPopulation.Add(new Applicant(applicantGenes));
             }
 

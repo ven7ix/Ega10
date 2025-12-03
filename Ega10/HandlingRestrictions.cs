@@ -2,7 +2,7 @@
 
 namespace Ega10
 {
-    internal class HandlingRestrictions
+    internal class HandlingRestrictions //2
     {
         public static List<Applicant> KILLSAME(List<Applicant> applicants)
         {
@@ -64,5 +64,13 @@ namespace Ega10
 
             return KILLSAME(handledApplicants);
         }
-    }
+
+        
+        public static List<Applicant> DECODE(List<Applicant> applicants)
+        {
+            List<Applicant> handledApplicants = [];
+
+            return KILLSAME(handledApplicants);
+        }
+    } 
 }

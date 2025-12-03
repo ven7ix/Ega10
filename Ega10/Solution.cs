@@ -26,11 +26,11 @@ namespace Ega10
             PrintInitialConditions(Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers);
 
             Population = InitialPopulation.GenerateHEURISTICS(PopulationSize, Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers);
-
-            for (int i = 0, iterationsWithSameBest = 0; i < 1000 && iterationsWithSameBest < 1000; i++, iterationsWithSameBest++)
+            
+            for (int i = 0, iterationsWithSameBest = 0; i < 1000 && iterationsWithSameBest < 1000; i++, iterationsWithSameBest++) //2
             {
                 Population = 
-                    NewPopulation.GenerateRANDOM(
+                    NewPopulation.GenerateBESTCHILDREN(
                         Evaluation.EvaluatePENALTY(
                             HandlingRestrictions.MODIFY(
                                 Mutation.MutateRANDOM(
