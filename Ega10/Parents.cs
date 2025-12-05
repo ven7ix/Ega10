@@ -7,113 +7,113 @@ namespace Ega10
         private const int MaxDistance = 40;
         private const int MinDistance = 40;
 
-        public static List<Tuple<Applicant, Applicant>> PickRANDOM(List<Applicant> population)
+        public static List<(IApplicant First, IApplicant Second)> PickPairsRANDOM(List<IApplicant> population)
         {
-            int parentPairsAmount = population.Count / 2;
-            List<Tuple<Applicant, Applicant>> parentPairs = new(parentPairsAmount);
+            int pairCount = population.Count / 2;
+            var pairs = new List<(IApplicant First, IApplicant Second)>(pairCount);
 
-            for (int i = 0; i < parentPairsAmount; i++)
+            List<int> availableIndices = [.. Enumerable.Range(0, population.Count)];
+
+            for (int i = 0; i < pairCount; i++)
             {
-                int firstParentID = Tools.Random.Next(0, population.Count);
-                //Applicant firstParent = new(EncodePermutation(population[firstParentID].Genes));
-                Applicant firstParent = new(population[firstParentID].Genes);
-                population.RemoveAt(firstParentID);
+                int firstIndex = Tools.Random.Next(0, availableIndices.Count);
+                int firstParentIndex = availableIndices[firstIndex];
+                availableIndices.RemoveAt(firstIndex);
 
-                int secondParentID = Tools.Random.Next(0, population.Count);
-                //Applicant secondParent = new(EncodePermutation(population[secondParentID].Genes));
-                Applicant secondParent = new(population[secondParentID].Genes);
-                population.RemoveAt(secondParentID);
+                int secondIndex = Tools.Random.Next(0, availableIndices.Count);
+                int secondParentIndex = availableIndices[secondIndex];
+                availableIndices.RemoveAt(secondIndex);
 
-                parentPairs.Add(new Tuple<Applicant, Applicant>(firstParent, secondParent));
+                pairs.Add((population[firstParentIndex], population[secondParentIndex]));
             }
 
-            return parentPairs;
+            return pairs;
         }
 
 
-        private static Applicant TryGetPartnerINBREEDING(List<Applicant> population, Applicant firstParent, int maxDistance)
+        private static IApplicant GetPartnerINBREEDING(List<IApplicant> population, List<int> availableIndices, IApplicant firstParent, int maxDistance)
         {
-            Applicant partner;
+            int index = Tools.Random.Next(0, availableIndices.Count);
+            int parterIndex = availableIndices[index];
+            IApplicant partner = population[parterIndex];
 
-            for (int p = 0; p < population.Count; p++)
+            for (; index < availableIndices.Count; index++)
             {
-                partner = new(EncodePermutation(population[p].Genes));
+                parterIndex = availableIndices[index];
 
-                if (DistanceBetweenPermutations(firstParent.Genes, partner.Genes) < maxDistance)
+                if (firstParent.DistanceToApplicant(population[parterIndex]) < maxDistance)
                 {
-                    population.RemoveAt(p);
-
-                    return partner;
+                    availableIndices.RemoveAt(index);
+                    return population[parterIndex];
                 }
             }
-
-            int partnerID = Tools.Random.Next(0, population.Count);
-            partner = new(EncodePermutation(population[partnerID].Genes));
-            population.RemoveAt(partnerID);
 
             return partner;
         }
 
-        public static List<Tuple<Applicant, Applicant>> PickINBREEDING(List<Applicant> population, int maxDistance = MaxDistance)
+        public static List<(IApplicant First, IApplicant Second)> PickINBREEDING(List<IApplicant> population, int maxDistance = MaxDistance)
         {
-            List<Tuple<Applicant, Applicant>> parentPairs = [];
+            int pairCount = population.Count / 2;
+            var pairs = new List<(IApplicant First, IApplicant Second)>(pairCount);
 
-            for (int i = 0; i < population.Count; i += 2)
+            List<int> availableIndices = [.. Enumerable.Range(0, population.Count)];
+
+            for (int i = 0; i < pairCount; i++)
             {
-                int firstParentID = Tools.Random.Next(0, population.Count);
-                Applicant firstParent = new(EncodePermutation(population[firstParentID].Genes));
-                population.RemoveAt(firstParentID);
+                int firstIndex = Tools.Random.Next(0, availableIndices.Count);
+                int firstParentIndex = availableIndices[firstIndex];
+                availableIndices.RemoveAt(firstIndex);
 
-                parentPairs.Add(new Tuple<Applicant, Applicant>(firstParent, TryGetPartnerINBREEDING(population, firstParent, maxDistance)));
+                pairs.Add((population[firstParentIndex], GetPartnerINBREEDING(population, availableIndices, population[firstParentIndex], maxDistance)));
             }
 
-            return parentPairs;
+            return pairs;
         }
 
 
-        private static Applicant TryGetPartnerOUTBREEDING(List<Applicant> population, Applicant firstParent, int minDistance)
+        private static IApplicant GetPartnerOUTBREEDING(List<IApplicant> population, List<int> availableIndices, IApplicant firstParent, int minDistance)
         {
-            Applicant partner;
+            int index = Tools.Random.Next(0, availableIndices.Count);
+            int parterIndex = availableIndices[index];
+            IApplicant partner = population[parterIndex];
 
-            for (int p = 0; p < population.Count; p++)
+            for (; index < availableIndices.Count; index++)
             {
-                partner = new(EncodePermutation(population[p].Genes));
+                parterIndex = availableIndices[index];
 
-                if (DistanceBetweenPermutations(firstParent.Genes, partner.Genes) > minDistance)
+                if (firstParent.DistanceToApplicant(population[parterIndex]) > minDistance)
                 {
-                    population.RemoveAt(p);
-
-                    return partner;
+                    availableIndices.RemoveAt(index);
+                    return population[parterIndex];
                 }
             }
-
-            int partnerID = Tools.Random.Next(0, population.Count);
-            partner = new(EncodePermutation(population[partnerID].Genes));
-            population.RemoveAt(partnerID);
 
             return partner;
         }
 
-        public static List<Tuple<Applicant, Applicant>> PickOUTBREEDING(List<Applicant> population, int minDistance = MinDistance)
+        public static List<(IApplicant First, IApplicant Second)> PickOUTBREEDING(List<IApplicant> population, int minDistance = MinDistance)
         {
-            List<Tuple<Applicant, Applicant>> parentPairs = [];
+            int pairCount = population.Count / 2;
+            var pairs = new List<(IApplicant First, IApplicant Second)>(pairCount);
 
-            for (int i = 0; i < population.Count; i += 2)
+            List<int> availableIndices = [.. Enumerable.Range(0, population.Count)];
+
+            for (int i = 0; i < pairCount; i++)
             {
-                int firstParentID = Tools.Random.Next(0, population.Count);
-                Applicant firstParent = new(EncodePermutation(population[firstParentID].Genes));
-                population.RemoveAt(firstParentID);
+                int firstIndex = Tools.Random.Next(0, availableIndices.Count);
+                int firstParentIndex = availableIndices[firstIndex];
+                availableIndices.RemoveAt(firstIndex);
 
-                parentPairs.Add(new Tuple<Applicant, Applicant>(firstParent, TryGetPartnerOUTBREEDING(population, firstParent, minDistance)));
+                pairs.Add((population[firstParentIndex], GetPartnerOUTBREEDING(population, availableIndices, population[firstParentIndex], minDistance)));
             }
 
-            return parentPairs;
+            return pairs;
         }
 
 
-        public static List<Tuple<Applicant, Applicant>> PickPOSITIVE(List<Applicant> population)
+        public static List<(IApplicant First, IApplicant Second)> PickPOSITIVE(List<IApplicant> population)
         {
-            List<Tuple<Applicant, Applicant>> parentPairs = [];
+            List<(IApplicant First, IApplicant Second)> parentPairs = [];
 
             return parentPairs;
         }

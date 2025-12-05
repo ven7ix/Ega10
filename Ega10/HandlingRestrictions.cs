@@ -1,18 +1,16 @@
-﻿using static Ega10.Tools;
-
-namespace Ega10
+﻿namespace Ega10
 {
     internal class HandlingRestrictions //2
     {
-        public static List<Applicant> KILLSAME(List<Applicant> applicants)
+        public static List<IApplicant> KILLSAME(List<IApplicant> applicants)
         {
             return [.. applicants.Distinct()];
         }
 
 
-        private static Applicant ApplicantMODIFY(Applicant applicant)
+        private static IApplicant ApplicantMODIFY(IApplicant applicant, Func<int[], IApplicant> applicantFactory)
         {
-            int[] genes = DecodePermutation(applicant.Genes);
+            int[] genes = applicant.Genes;
             List<int> uniqueGenes = [];
             List<int> newGenes = [];
 
@@ -34,29 +32,30 @@ namespace Ega10
                 uniqueGenes.Add(genes[gen]);
             }
 
-            return new Applicant(EncodePermutation(genes));
+            var newApplicant = applicantFactory(genes);
+            return newApplicant;
         }
 
-        public static List<Applicant> MODIFY(List<Applicant> applicants)
+        public static List<IApplicant> MODIFY(List<IApplicant> applicants, Func<int[], IApplicant> applicantFactory)
         {
-            List<Applicant> handledApplicants = [];
+            List<IApplicant> handledApplicants = [];
 
-            foreach (Applicant applicant in applicants)
+            foreach (IApplicant applicant in applicants)
             {
-                handledApplicants.Add(ApplicantMODIFY(applicant));
+                handledApplicants.Add(ApplicantMODIFY(applicant, applicantFactory));
             }
 
             return KILLSAME(handledApplicants);
         }
 
 
-        public static List<Applicant> ELIMINATE(List<Applicant> applicants)
+        public static List<IApplicant> ELIMINATE(List<IApplicant> applicants)
         {
-            List<Applicant> handledApplicants = [];
+            List<IApplicant> handledApplicants = [];
 
-            foreach (Applicant applicant in applicants)
+            foreach (IApplicant applicant in applicants)
             {
-                if (RightPemutation(DecodePermutation(applicant.Genes)))
+                if (applicant.ValidGenes)
                 {
                     handledApplicants.Add(applicant);
                 }
@@ -65,10 +64,10 @@ namespace Ega10
             return KILLSAME(handledApplicants);
         }
 
-        
-        public static List<Applicant> DECODE(List<Applicant> applicants)
+
+        public static List<IApplicant> DECODE(List<IApplicant> applicants)
         {
-            List<Applicant> handledApplicants = [];
+            List<IApplicant> handledApplicants = [];
 
             return KILLSAME(handledApplicants);
         }

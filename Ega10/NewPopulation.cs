@@ -4,15 +4,16 @@ namespace Ega10
 {
     internal static class NewPopulation //1
     {
-        public static List<Applicant> GenerateBESTCHILDREN(List<EvaluatedApplicant> children, int populationSize)
+        public static List<IApplicant> GenerateBESTCHILDREN(List<EvaluatedApplicant> children, int populationSize, Func<int[], IApplicant> childFactory)
         {
             int newPopulationSize = Math.Min(children.Count, populationSize);
 
-            List<Applicant> newPopulation = new(newPopulationSize);
+            List<IApplicant> newPopulation = new(newPopulationSize);
 
             for (int i = 0; i < newPopulationSize; i++)
             {
-                newPopulation.Add(new Applicant(children[i].Genes));
+                var child = childFactory(children[i].Genes);
+                newPopulation.Add(child);
             }
 
             return newPopulation;

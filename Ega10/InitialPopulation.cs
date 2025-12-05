@@ -5,44 +5,51 @@ namespace Ega10
 {
     internal static class InitialPopulation //6
     {
-        public static List<Applicant> GenerateRANDOM(int populationSize, int applications)
+        private static int[] GenerateGenesRandom(int genesCount)
         {
-            List<Applicant> initialPopulation = [];
+            int[] genes = new int[genesCount];
 
-            for (int applicant = 0; applicant < populationSize; applicant++)
+            for (int gen = 0; gen < genesCount; gen++)
             {
-                int[] applicantGenes = new int[applications];
+                genes[gen] = Tools.Random.Next(0, genesCount);
+            }
 
-                for (int a = 0; a < applications; a++)
-                {
-                    applicantGenes[a] = Tools.Random.Next(0, applications);
-                }
+            return genes;
+        }
 
-                initialPopulation.Add(new Applicant(applicantGenes));
+        public static List<IApplicant> GenerateRANDOM(Func<int[], IApplicant> applicantFactory, int populationCount, int genesCount)
+        {
+            List<IApplicant> initialPopulation = [];
+
+            for (int i = 0; i < populationCount; i++)
+            {
+                IApplicant applicant = applicantFactory(GenerateGenesRandom(genesCount));
+                initialPopulation.Add(applicant);
             }
 
             return initialPopulation;
         }
 
 
-        public static List<Applicant> GenerateRANDOMCONTROL(int populationSize, int applications)
+        public static List<IApplicant> GenerateRANDOMCONTROL(Func<int[], IApplicant> applicantFactory, int populationCount, int genesCount)
         {
-            List<Applicant> initialPopulation = [];
+            List<IApplicant> initialPopulation = [];
 
-            for (int applicant = 0; applicant < populationSize; applicant++)
+            for (int i = 0; i < populationCount; i++)
             {
-                List<int> applicationIDs = [.. Enumerable.Range(0, applications)];
-                int[] applicantGenes = new int[applications];
+                List<int> genesIndices = [.. Enumerable.Range(0, genesCount)];
+                int[] genes = new int[genesCount];
 
-                for (int a = 0; a < applications; a++)
+                for (int a = 0; a < genesCount; a++)
                 {
-                    int applicationID = applicationIDs[Tools.Random.Next(0, applicationIDs.Count)];
-                    _ = applicationIDs.Remove(applicationID);
+                    int genIndex = genesIndices[Tools.Random.Next(0, genesIndices.Count)];
+                    _ = genesIndices.Remove(genIndex);
 
-                    applicantGenes[a] = applicationID;
+                    genes[a] = genIndex;
                 }
 
-                initialPopulation.Add(new Applicant(applicantGenes));
+                var applicant = applicantFactory(genes);
+                initialPopulation.Add(applicant);
             }
 
             return initialPopulation;
@@ -91,9 +98,9 @@ namespace Ega10
             return new(-1, int.MinValue);
         }
 
-        private static Applicant GenerateApplicant(IndexValuePair[] ordering, double orderingSum, int applications, int machines, int[][] executionTimes, int[] dueTimes, int[] penaltyMultiplyers)
+        private static IApplicant GenerateApplicant(Func<int[], IApplicant> applicantFactory, IndexValuePair[] ordering, double orderingSum, int applications, int machines, int[][] executionTimes, int[] dueTimes, int[] penaltyMultiplyers)
         {
-            IndexValuePair[] applicantOrdering = new IndexValuePair[ordering.Length];
+            var applicantOrdering = new IndexValuePair[ordering.Length];
             Array.Copy(ordering, applicantOrdering, ordering.Length);
 
             int[] applicationsPermutation = new int[applications];
@@ -105,7 +112,7 @@ namespace Ega10
 
             Array.Sort(applicantOrdering);
 
-            IndexValuePair[] orderingByProbability = new IndexValuePair[applications];
+            var orderingByProbability = new IndexValuePair[applications];
             for (int a = 0; a < applications; a++)
             {
                 orderingByProbability[a] = new(applicantOrdering[a].Index, applicantOrdering[^(a + 1)].Value);
@@ -135,21 +142,21 @@ namespace Ega10
                 totalPenalty += penaltyMultiplyers[a] * Math.Max(0, machineTimes[machines - 1] - dueTimes[currentApplication.Index]);
             }
 
-            return new Applicant(applicationsPermutation);
+            return applicantFactory(applicationsPermutation);
         }
 
-        public static List<Applicant> GenerateHEURISTICS(int populationSize, int applications, int machines, int[][] executionTimes, int[] dueTimes, int[] penaltyMultiplyers)
+        public static List<IApplicant> GenerateHEURISTICS(Func<int[], IApplicant> applicantFactory, int populationCount, int applications, int machines, int[][] executionTimes, int[] dueTimes, int[] penaltyMultiplyers)
         {
-            List<Applicant> initialPopulation = [];
+            List<IApplicant> initialPopulation = [];
 
-            IndexValuePair[] ordering = new IndexValuePair[applications];
+            var ordering = new IndexValuePair[applications];
             double orderingSum = 0;
 
             GenerateOrdering(ordering, ref orderingSum, applications, machines, executionTimes, dueTimes, penaltyMultiplyers);
 
-            for (int i = 0; i < populationSize; i++)
+            for (int i = 0; i < populationCount; i++)
             {
-                initialPopulation.Add(GenerateApplicant(ordering, orderingSum, applications, machines, executionTimes, dueTimes, penaltyMultiplyers));
+                initialPopulation.Add(GenerateApplicant(applicantFactory, ordering, orderingSum, applications, machines, executionTimes, dueTimes, penaltyMultiplyers));
             }
 
             return initialPopulation;

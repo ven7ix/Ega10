@@ -4,16 +4,16 @@ namespace Ega10
 {
     internal static class Mutation //3
     {
-        public static List<Applicant> MutateDONT(List<Applicant> children)
+        public static List<IApplicant> MutateDONT(List<IApplicant> children)
         {
             return children;
         }
 
-        public static List<Applicant> MutateRANDOMCONTOL(List<Applicant> children)
+        public static List<IApplicant> MutateRANDOMCONTOL(List<IApplicant> children)
         {
-            List<Applicant> mutatedChildren = [];
+            List<IApplicant> mutatedChildren = [];
 
-            foreach (Applicant child in children)
+            foreach (IApplicant child in children)
             {
                 int genMutations = Tools.Random.Next(0, child.Genes.Length);
 
@@ -31,11 +31,11 @@ namespace Ega10
             return mutatedChildren;
         }
 
-        public static List<Applicant> MutateRANDOM(List<Applicant> children)
+        public static List<IApplicant> MutateRANDOM(List<IApplicant> children)
         {
-            List<Applicant> mutatedChildren = [];
+            List<IApplicant> mutatedChildren = [];
 
-            foreach (Applicant child in children)
+            foreach (IApplicant child in children)
             {
                 int genMutations = Tools.Random.Next(0, child.Genes.Length);
 
@@ -52,16 +52,16 @@ namespace Ega10
             return mutatedChildren;
         }
 
-        public static List<Applicant> MutateCOMPLEMENT(List<Applicant> children)
+        public static List<IApplicant> MutateCOMPLEMENT(List<IApplicant> children)
         {
-            List<Applicant> mutatedChildren = [];
+            List<IApplicant> mutatedChildren = [];
             
-            foreach (Applicant child in children)
+            foreach (IApplicant child in children)
             {
                 for (int gen = 0; gen < child.Genes.Length; gen++)
                 {
                     if (Tools.Random.Next(0, 2) == 0)
-                        child.Genes[gen] = child.Genes.Length - child.Genes[gen];
+                        child.Genes[gen] = child.Genes.Length - 1 - child.Genes[gen];
 
                     mutatedChildren.Add(child);
                 }
