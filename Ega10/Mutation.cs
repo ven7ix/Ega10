@@ -96,15 +96,14 @@
                 }
 
                 int genesCount = children[i].Genes.Length;
+                int[] complementGenes = children[i].GetComplementGenes();
 
                 for (int gen = 0; gen < genesCount; gen++)
                 {
                     if (Tools.Random.Next(0, genMutationChance) != 0)
-                    {
                         continue;
-                    }
 
-                    children[i].Genes[gen] = genesCount - 1 - children[i].Genes[gen];
+                    children[i].Genes[gen] = complementGenes[gen];
                 }
 
                 mutatedChildren.Add(children[i]);

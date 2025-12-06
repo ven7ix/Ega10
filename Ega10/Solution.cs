@@ -39,7 +39,7 @@
                     iterationsWithSameBest = 0;
                 }
 
-                Population = GenerateNewPopulation(applicantFactory);
+                GenerateNewPopulation(applicantFactory);
             }
         }
 
@@ -62,7 +62,7 @@
                     Console.WriteLine(Best);
                 }
 
-                Population = GenerateNewPopulation(applicantFactory);
+                GenerateNewPopulation(applicantFactory);
             }
         }
 
@@ -109,7 +109,7 @@
                     Console.WriteLine(Best);
                 }
 
-                Population = GenerateNewPopulation(applicantFactory);
+                GenerateNewPopulation(applicantFactory);
             }
         }
 
@@ -154,17 +154,17 @@
             Population = InitialPopulation.GenerateHEURISTIC(applicantFactory, PopulationSize, Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers);
         }
 
-        private static List<IApplicant> GenerateNewPopulation(Func<int[], IApplicant> applicantFactory)
+        private static void GenerateNewPopulation(Func<int[], IApplicant> applicantFactory)
         {
-            return 
+            Population =
                 NewPopulation.Generate(
                     Selection.EvaluateChildren(
                         HandlingRestrictions.DECODE(
                             Mutation.MutateCOMPLEMENT(
                                 Crossover.CrossoverPairs(
                                     Parents.PickPairsRANDOM(Population)),
-                                2, 3), 
-                            applicantFactory), 
+                                5, 10),
+                           applicantFactory),
                         PopulationSize, Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers), 
                     applicantFactory);
         }

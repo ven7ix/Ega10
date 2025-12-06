@@ -2,7 +2,7 @@
 {
     internal class HandlingRestrictions //2
     {
-        private static List<IApplicant> KILLSAME(in List<IApplicant> applicants)
+        public static List<IApplicant> KILLSAME(in List<IApplicant> applicants)
         {
             return [.. applicants.Distinct()];
         }
@@ -41,7 +41,7 @@
         }
 
         /// <summary>
-        /// Modifies all <paramref name="applicants"/> with invalid genes. Works like trash with <see cref="ApplicantOrdinal"/>
+        /// Modifies all <paramref name="applicants"/> with invalid genes. Works only with <see cref="ApplicantCyclic"/>
         /// </summary>
         /// <param name="applicants">Children</param>
         /// <param name="applicantFactory">How applicants will be created</param>
@@ -53,7 +53,14 @@
 
             for (int i = 0; i < applicantsCount; i++)
             {
-                handledApplicants.Add(ApplicantMODIFY(applicants[i], applicantFactory));
+                if (applicants[i].ValidGenes)
+                {
+                    handledApplicants.Add(applicants[i]);
+                }
+                else
+                {
+                    handledApplicants.Add(ApplicantMODIFY(applicants[i], applicantFactory));
+                }
             }
 
             return KILLSAME(handledApplicants);
@@ -97,14 +104,15 @@
                 if (applicants[i].ValidGenes)
                 {
                     handledApplicants.Add(applicants[i]);
-                    continue;
                 }
-
-                IApplicant applicant = applicantFactory(ApplicantOrdinal.Decode(applicants[i].Genes));
-
-                if (applicant.ValidGenes)
+                else
                 {
-                    handledApplicants.Add(applicant);
+                    IApplicant applicant = applicantFactory(ApplicantOrdinal.Decode(applicants[i].Genes));
+
+                    if (applicant.ValidGenes)
+                    {
+                        handledApplicants.Add(applicant);
+                    }
                 }
             }
 

@@ -13,10 +13,7 @@
 
             foreach (var (first, second) in parentPairs)
             {
-                if (first.GetType() == second.GetType())
-                {
-                    children = [.. children, .. first.CrossoverWith(second)];
-                }
+                children = [.. children, .. first.CrossoverWith(second)];
             }
 
             return children;

@@ -9,7 +9,8 @@
     {
         public static void Main()
         {
-            Solution.SolveGeneticDiversity(genes => new ApplicantCyclic(genes), 0.55f, 10);
+            Solution.SolveGeneticDiversity(genes => new ApplicantCyclic(genes), 0.5f, 20);
+            //Solution.SolveGeneticDiversity(genes => new ApplicantOrdinal(genes), 0.5f, 20);
         }
     }
 }

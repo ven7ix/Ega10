@@ -15,17 +15,17 @@
         /// <returns>List of <paramref name="populationSize"/> or <paramref name="applicants"/>.Count (whichever is smaller) evaluated applicants</returns>
         public static List<EvaluatedApplicant> EvaluateChildren(in List<IApplicant> applicants, in int populationSize, in int applications, in int machines, in int[][] executionTimes, in int[] dueTimes, in int[] penaltyMultiplyers)
         {
-            int evaluatedApplicantsCount = Math.Min(populationSize, applicants.Count);
-            var evaluatedApplicants = new List<EvaluatedApplicant>(evaluatedApplicantsCount);
+            int applicantsCount = applicants.Count;
+            var evaluatedApplicants = new List<EvaluatedApplicant>(applicantsCount);
 
-            for (int i = 0; i < evaluatedApplicantsCount; i++)
+            for (int i = 0; i < applicantsCount; i++)
             {
                 evaluatedApplicants.Add(applicants[i].Evaluate(applications, machines, executionTimes, dueTimes, penaltyMultiplyers));
             }
 
             evaluatedApplicants.Sort();
 
-            return evaluatedApplicants.GetRange(0, evaluatedApplicantsCount);
+            return evaluatedApplicants.GetRange(0, Math.Min(populationSize, applicantsCount));
         }
 
         /// <summary>
@@ -42,22 +42,22 @@
         /// <returns>List of <paramref name="populationSize"/> or <paramref name="applicants"/>.Count (whichever is smaller) evaluated applicants</returns>
         public static List<EvaluatedApplicant> EvaluatePopulationAndChildren(in List<IApplicant> population, in int populationSize, in List<IApplicant> applicants, in int applications, in int machines, in int[][] executionTimes, in int[] dueTimes, in int[] penaltyMultiplyers)
         {
-            int evaluatedApplicantsCount = Math.Min(populationSize, applicants.Count);
-            var evaluatedApplicants = new List<EvaluatedApplicant>(population.Count + evaluatedApplicantsCount);
+            int applicantsCount = applicants.Count;
+            var evaluatedApplicants = new List<EvaluatedApplicant>(population.Count + applicantsCount);
 
             for (int i = 0; i < population.Count; i++)
             {
                 evaluatedApplicants.Add(population[i].Evaluate(applications, machines, executionTimes, dueTimes, penaltyMultiplyers));
             }
 
-            for (int i = 0; i < evaluatedApplicantsCount; i++)
+            for (int i = 0; i < applicantsCount; i++)
             {
                 evaluatedApplicants.Add(applicants[i].Evaluate(applications, machines, executionTimes, dueTimes, penaltyMultiplyers));
             }
 
             evaluatedApplicants.Sort();
 
-            return evaluatedApplicants.GetRange(0, evaluatedApplicantsCount);
+            return evaluatedApplicants.GetRange(0, Math.Min(populationSize, applicantsCount));
         }
 
         /// <summary>
@@ -74,14 +74,14 @@
         /// <returns>List of <paramref name="populationSize"/> or <paramref name="applicants"/>.Count (whichever is smaller) evaluated applicants</returns>
         public static List<EvaluatedApplicant> BetaTournament(in List<IApplicant> applicants, in int populationSize, in int tournamentFreeSpaces, in int applications, in int machines, in int[][] executionTimes, in int[] dueTimes, in int[] penaltyMultiplyers)
         {
-            int evaluatedApplicantsCount = Math.Min(populationSize, applicants.Count);
+            int applicantsCount = applicants.Count;
 
-            var evaluatedApplicants = new List<EvaluatedApplicant>(evaluatedApplicantsCount);
+            var evaluatedApplicants = new List<EvaluatedApplicant>(applicantsCount);
             var competingApplicants = new List<EvaluatedApplicant>(tournamentFreeSpaces);
 
-            List<int> availableIndices = [.. Enumerable.Range(0, evaluatedApplicantsCount)];
+            List<int> availableIndices = [.. Enumerable.Range(0, applicantsCount)];
 
-            for (int i = 0; i < evaluatedApplicantsCount; i++)
+            for (int i = 0; i < applicantsCount; i++)
             {
                 int index = Tools.Random.Next(0, availableIndices.Count);
                 int applicantIndex = availableIndices[index];
@@ -98,7 +98,7 @@
 
             evaluatedApplicants.Sort();
 
-            return evaluatedApplicants.GetRange(0, evaluatedApplicantsCount);
+            return evaluatedApplicants.GetRange(0, Math.Min(populationSize, applicantsCount));
         }
     }
 }

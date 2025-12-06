@@ -1,8 +1,90 @@
 ﻿using System.Collections;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 
 namespace Ega10
 {
+    internal interface IChromosome
+    {
+        int[] Genes { get; }
+        bool ValidGenes { get; }
+    }
+
+    internal interface ICrossoverable<T> where T : IChromosome
+    {
+        List<T> CrossoverWith(T partner);
+    }
+
+    internal interface IEvaluatable
+    {
+        EvaluatedApplicant Evaluate(int applications, int machines, int[][] executionTimes, int[] dueTimes, int[] penaltyMultiplyers);
+    }
+
+    internal interface IMutable
+    {
+        IChromosome ModifyGenes(Func<int[], IChromosome> chromosomeFactory);
+    }
+
+    internal abstract class Chromosome : IChromosome
+    {
+        public int[] Genes { get; protected set; }
+        public virtual bool ValidGenes
+        {
+            get
+            {
+                int genesLength = Genes.Length;
+
+                bool[] found = new bool[genesLength];
+
+                for (int i = 0; i < genesLength; i++)
+                {
+                    int gene = Genes[i];
+
+                    if (gene < 0 || gene >= genesLength || found[gene])
+                        return false;
+
+                    found[gene] = true;
+                }
+
+                return true;
+            }
+        }
+
+        public override string ToString()
+        {
+            string arrayString = string.Empty;
+
+            for (int i = 0; i < Genes.Length; i++)
+            {
+                arrayString += $"{(Genes[i] < 10 ? ' ' : string.Empty)}{Genes[i]} ";
+            }
+
+            return arrayString;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is Chromosome chromosome)
+            {
+                return Genes.SequenceEqual(chromosome.Genes);
+            }
+
+            throw new ArgumentException("Inccorect type comparason");
+        }
+
+        public override int GetHashCode()
+        {
+            int hash = 17;
+
+            for (int i = 0; i < Genes.Length; i++)
+            {
+                hash = hash * 31 + Genes[i];
+            }
+
+            return hash;
+        }
+    }
+
     internal interface IApplicant
     {
         int[] Genes { get; }
@@ -10,9 +92,9 @@ namespace Ega10
         {
             get
             {
-                for (int i = 0; i < Genes.Length; i++)
+                for (int gen = 0; gen < Genes.Length; gen++)
                 {
-                    if (!Genes.Contains(i))
+                    if (!Genes.Contains(gen))
                         return false;
                 }
 
@@ -54,6 +136,40 @@ namespace Ega10
         /// <param name="partner">Partner to cross with</param>
         /// <returns>List of children who do not equal their parents</returns>
         List<IApplicant> CrossoverWith(IApplicant partner);
+
+        int[] GetComplementGenes();
+
+        IApplicant ModifyGenes(in IApplicant applicant, Func<int[], IApplicant> applicantFactory)
+        {
+            int genesCount = applicant.Genes.Length;
+
+            int[] genes = new int[genesCount];
+            Array.Copy(applicant.Genes, genes, genesCount);
+
+            List<int> uniqueGenes = [];
+            List<int> newGenes = [];
+
+            for (int gen = 0; gen < genesCount; gen++)
+            {
+                if (!genes.Contains(gen))
+                {
+                    newGenes.Add(gen);
+                }
+            }
+
+            for (int gen = 0, newGen = 0; gen < genesCount; gen++)
+            {
+                if (uniqueGenes.Contains(genes[gen]))
+                {
+                    genes[gen] = newGenes[newGen++];
+                }
+
+                uniqueGenes.Add(genes[gen]);
+            }
+
+            var newApplicant = applicantFactory(genes);
+            return newApplicant;
+        }
 
         EvaluatedApplicant Evaluate(int applications, int machines, int[][] executionTimes, int[] dueTimes, int[] penaltyMultiplyers)
         {
@@ -117,17 +233,6 @@ namespace Ega10
             return ((IStructuralEquatable)Genes).GetHashCode(EqualityComparer<int>.Default);
         }
 
-        public static bool operator ==(ApplicantCyclic left, ApplicantCyclic right)
-        {
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(ApplicantCyclic left, ApplicantCyclic right)
-        {
-            return !(left == right);
-        }
-
-        
         private static List<int[]> ListAllCycles(int[] permutationIndices, int[] permutationValues)
         {
             int permutationLength = permutationIndices.Length;
@@ -192,6 +297,18 @@ namespace Ega10
 
             return children;
         }
+
+        public readonly int[] GetComplementGenes()
+        {
+            int[] genes = new int[Genes.Length];
+
+            for (int i = 0; i < Genes.Length; i++)
+            {
+                genes[i] = Genes.Length - 1 - Genes[i];
+            }
+
+            return genes;
+        }
     }
 
     internal struct ApplicantOrdinal(int[] genes, bool encodeGenes = true) : IApplicant
@@ -201,11 +318,9 @@ namespace Ega10
         {
             get
             {
-                int[] genes = Decode(Genes);
-
-                for (int i = 0; i < genes.Length; i++)
+                for (int gen = 0; gen < Genes.Length; gen++)
                 {
-                    if (!genes.Contains(i))
+                    if (Genes[gen] < 0 || Genes[gen] > Genes.Length - 1 - gen)
                         return false;
                 }
 
@@ -239,17 +354,6 @@ namespace Ega10
         {
             return ((IStructuralEquatable)Genes).GetHashCode(EqualityComparer<int>.Default);
         }
-
-        public static bool operator ==(ApplicantOrdinal left, ApplicantOrdinal right)
-        {
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(ApplicantOrdinal left, ApplicantOrdinal right)
-        {
-            return !(left == right);
-        }
-
 
         private static int[] GenerateCuts(int genesCount)
         {
@@ -332,6 +436,50 @@ namespace Ega10
             }
 
             return children;
+        }
+
+        public readonly int[] GetComplementGenes()
+        {
+            int[] genes = new int[Genes.Length];
+
+            for (int i = 0; i < Genes.Length; i++)
+            {
+                genes[i] = Genes.Length - 1 - i - Genes[i];
+            }
+
+            return genes;
+        }
+
+        public readonly IApplicant ModifyGenes(in IApplicant applicant, Func<int[], IApplicant> applicantFactory)
+        {
+            int genesCount = applicant.Genes.Length;
+
+            int[] genes = new int[genesCount];
+            Array.Copy(Decode(applicant.Genes), genes, genesCount);
+
+            List<int> uniqueGenes = [];
+            List<int> newGenes = [];
+
+            for (int gen = 0; gen < genesCount; gen++)
+            {
+                if (!genes.Contains(gen))
+                {
+                    newGenes.Add(gen);
+                }
+            }
+
+            for (int gen = 0, newGen = 0; gen < genesCount; gen++)
+            {
+                if (uniqueGenes.Contains(genes[gen]))
+                {
+                    genes[gen] = newGenes[newGen++];
+                }
+
+                uniqueGenes.Add(genes[gen]);
+            }
+
+            var newApplicant = applicantFactory(Encode(genes));
+            return newApplicant;
         }
 
         /// <summary>
@@ -469,6 +617,11 @@ namespace Ega10
         }
 
         public List<IApplicant> CrossoverWith(IApplicant partner)
+        {
+            throw new NotImplementedException();
+        }
+
+        public readonly int[] GetComplementGenes()
         {
             throw new NotImplementedException();
         }
