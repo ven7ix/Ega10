@@ -1,16 +1,18 @@
-﻿using static Ega10.Tools;
-
-namespace Ega10
+﻿namespace Ega10
 {
     internal static class NewPopulation //1
     {
-        public static List<IApplicant> GenerateBESTCHILDREN(List<EvaluatedApplicant> children, int populationSize, Func<int[], IApplicant> childFactory)
+        /// <summary>
+        /// Generates new population
+        /// </summary>
+        /// <param name="children">Evaluated applicants</param>
+        /// <param name="childFactory">How applicants will be created</param>
+        /// <returns>New population</returns>
+        public static List<IApplicant> Generate(in List<EvaluatedApplicant> children, Func<int[], IApplicant> childFactory)
         {
-            int newPopulationSize = Math.Min(children.Count, populationSize);
+            List<IApplicant> newPopulation = new(children.Count);
 
-            List<IApplicant> newPopulation = new(newPopulationSize);
-
-            for (int i = 0; i < newPopulationSize; i++)
+            for (int i = 0; i < children.Count; i++)
             {
                 var child = childFactory(children[i].Genes);
                 newPopulation.Add(child);

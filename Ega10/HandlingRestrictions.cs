@@ -2,19 +2,23 @@
 {
     internal class HandlingRestrictions //2
     {
-        public static List<IApplicant> KILLSAME(List<IApplicant> applicants)
+        private static List<IApplicant> KILLSAME(in List<IApplicant> applicants)
         {
             return [.. applicants.Distinct()];
         }
 
 
-        private static IApplicant ApplicantMODIFY(IApplicant applicant, Func<int[], IApplicant> applicantFactory)
+        private static IApplicant ApplicantMODIFY(in IApplicant applicant, Func<int[], IApplicant> applicantFactory)
         {
-            int[] genes = applicant.Genes;
+            int genesCount = applicant.Genes.Length;
+
+            int[] genes = new int[genesCount];
+            Array.Copy(applicant.Genes, genes, genesCount);
+
             List<int> uniqueGenes = [];
             List<int> newGenes = [];
 
-            for (int gen = 0; gen < genes.Length; gen++)
+            for (int gen = 0; gen < genesCount; gen++)
             {
                 if (!genes.Contains(gen))
                 {
@@ -22,7 +26,7 @@
                 }
             }
 
-            for (int gen = 0, newGen = 0; gen < genes.Length; gen++)
+            for (int gen = 0, newGen = 0; gen < genesCount; gen++)
             {
                 if (uniqueGenes.Contains(genes[gen]))
                 {
@@ -36,28 +40,41 @@
             return newApplicant;
         }
 
-        public static List<IApplicant> MODIFY(List<IApplicant> applicants, Func<int[], IApplicant> applicantFactory)
+        /// <summary>
+        /// Modifies all <paramref name="applicants"/> with invalid genes. Works like trash with <see cref="ApplicantOrdinal"/>
+        /// </summary>
+        /// <param name="applicants">Children</param>
+        /// <param name="applicantFactory">How applicants will be created</param>
+        /// <returns>List of applicants with modified genes, which are valid</returns>
+        public static List<IApplicant> MODIFY(in List<IApplicant> applicants, Func<int[], IApplicant> applicantFactory)
         {
-            List<IApplicant> handledApplicants = [];
+            int applicantsCount = applicants.Count;
+            var handledApplicants = new List<IApplicant>(applicantsCount);
 
-            foreach (IApplicant applicant in applicants)
+            for (int i = 0; i < applicantsCount; i++)
             {
-                handledApplicants.Add(ApplicantMODIFY(applicant, applicantFactory));
+                handledApplicants.Add(ApplicantMODIFY(applicants[i], applicantFactory));
             }
 
             return KILLSAME(handledApplicants);
         }
 
 
-        public static List<IApplicant> ELIMINATE(List<IApplicant> applicants)
+        /// <summary>
+        /// Eliminates all <paramref name="applicants"/> with invalid genes
+        /// </summary>
+        /// <param name="applicants">Children</param>
+        /// <returns>List of applicants, excluding those with invalid genes</returns>
+        public static List<IApplicant> ELIMINATE(in List<IApplicant> applicants)
         {
-            List<IApplicant> handledApplicants = [];
+            int applicantsCount = applicants.Count;
+            var handledApplicants = new List<IApplicant>(applicantsCount);
 
-            foreach (IApplicant applicant in applicants)
+            for (int i = 0; i < applicantsCount; i++)
             {
-                if (applicant.ValidGenes)
+                if (applicants[i].ValidGenes)
                 {
-                    handledApplicants.Add(applicant);
+                    handledApplicants.Add(applicants[i]);
                 }
             }
 
@@ -65,9 +82,31 @@
         }
 
 
-        public static List<IApplicant> DECODE(List<IApplicant> applicants)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="applicants"></param>
+        /// <returns></returns>
+        public static List<IApplicant> DECODE(in List<IApplicant> applicants, Func<int[], IApplicant> applicantFactory)
         {
-            List<IApplicant> handledApplicants = [];
+            int applicantsCount = applicants.Count;
+            var handledApplicants = new List<IApplicant>(applicantsCount);
+
+            for (int i = 0; i < applicantsCount; i++)
+            {
+                if (applicants[i].ValidGenes)
+                {
+                    handledApplicants.Add(applicants[i]);
+                    continue;
+                }
+
+                IApplicant applicant = applicantFactory(ApplicantOrdinal.Decode(applicants[i].Genes));
+
+                if (applicant.ValidGenes)
+                {
+                    handledApplicants.Add(applicant);
+                }
+            }
 
             return KILLSAME(handledApplicants);
         }

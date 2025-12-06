@@ -2,7 +2,12 @@
 {
     internal static class Crossover //2
     {
-        public static List<IApplicant> CrossoverPairs(List<(IApplicant, IApplicant)> parentPairs)
+        /// <summary>
+        /// Crossovers parent pairs using <see cref="IApplicant.CrossoverWith(IApplicant)"/>
+        /// </summary>
+        /// <param name="parentPairs">Parent pairs</param>
+        /// <returns>List of children who do not equal their parents</returns>
+        public static List<IApplicant> CrossoverPairs(in List<(IApplicant, IApplicant)> parentPairs)
         {
             List<IApplicant> children = [];
 

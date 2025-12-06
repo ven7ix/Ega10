@@ -1,20 +1,23 @@
-﻿using static Ega10.Tools;
-
-namespace Ega10
+﻿namespace Ega10
 {
-    internal static class Parents //5
+    internal static class Parents //7
     {
         private const int MaxDistance = 40;
         private const int MinDistance = 40;
 
-        public static List<(IApplicant First, IApplicant Second)> PickPairsRANDOM(List<IApplicant> population)
+        /// <summary>
+        /// Picks pairs of parents completly at random
+        /// </summary>
+        /// <param name="population">Current population</param>
+        /// <returns>List of pairs, each containing two parents</returns>
+        public static List<(IApplicant, IApplicant)> PickPairsRANDOM(in List<IApplicant> population)
         {
-            int pairCount = population.Count / 2;
-            var pairs = new List<(IApplicant First, IApplicant Second)>(pairCount);
+            int pairsCount = population.Count / 2;
+            var pairs = new List<(IApplicant, IApplicant)>(pairsCount);
 
             List<int> availableIndices = [.. Enumerable.Range(0, population.Count)];
 
-            for (int i = 0; i < pairCount; i++)
+            for (int i = 0; i < pairsCount; i++)
             {
                 int firstIndex = Tools.Random.Next(0, availableIndices.Count);
                 int firstParentIndex = availableIndices[firstIndex];
@@ -31,7 +34,7 @@ namespace Ega10
         }
 
 
-        private static IApplicant GetPartnerINBREEDING(List<IApplicant> population, List<int> availableIndices, IApplicant firstParent, int maxDistance)
+        private static IApplicant GetPartnerINBREEDING(in List<IApplicant> population, List<int> availableIndices, in IApplicant firstParent, int maxDistance)
         {
             int index = Tools.Random.Next(0, availableIndices.Count);
             int parterIndex = availableIndices[index];
@@ -51,14 +54,20 @@ namespace Ega10
             return partner;
         }
 
-        public static List<(IApplicant First, IApplicant Second)> PickINBREEDING(List<IApplicant> population, int maxDistance = MaxDistance)
+        /// <summary>
+        /// Picks pairs of parents with minimal distance between them, using <see cref="IApplicant.DistanceToApplicant(IApplicant)"/>
+        /// </summary>
+        /// <param name="population">Current population</param>
+        /// <param name="maxDistance">Max distance between two permutations. Uses <see cref="IApplicant.DistanceToApplicant(IApplicant)"/>to determine it</param>
+        /// <returns>List of pairs, each containing two parents</returns>
+        public static List<(IApplicant, IApplicant)> PickINBREEDING(in List<IApplicant> population, int maxDistance = MaxDistance)
         {
-            int pairCount = population.Count / 2;
-            var pairs = new List<(IApplicant First, IApplicant Second)>(pairCount);
+            int pairsCount = population.Count / 2;
+            var pairs = new List<(IApplicant, IApplicant)>(pairsCount);
 
             List<int> availableIndices = [.. Enumerable.Range(0, population.Count)];
 
-            for (int i = 0; i < pairCount; i++)
+            for (int i = 0; i < pairsCount; i++)
             {
                 int firstIndex = Tools.Random.Next(0, availableIndices.Count);
                 int firstParentIndex = availableIndices[firstIndex];
@@ -71,7 +80,7 @@ namespace Ega10
         }
 
 
-        private static IApplicant GetPartnerOUTBREEDING(List<IApplicant> population, List<int> availableIndices, IApplicant firstParent, int minDistance)
+        private static IApplicant GetPartnerOUTBREEDING(in List<IApplicant> population, List<int> availableIndices, in IApplicant firstParent, int minDistance)
         {
             int index = Tools.Random.Next(0, availableIndices.Count);
             int parterIndex = availableIndices[index];
@@ -91,14 +100,21 @@ namespace Ega10
             return partner;
         }
 
-        public static List<(IApplicant First, IApplicant Second)> PickOUTBREEDING(List<IApplicant> population, int minDistance = MinDistance)
+        /// <summary>
+        /// Picks pairs of parents with biggest distance between them.
+        /// Uses <see cref="IApplicant.DistanceToApplicant(IApplicant)"/>to determine it
+        /// </summary>
+        /// <param name="population">Current population</param>
+        /// <param name="minDistance">Min distance between two permutations, using <see cref="IApplicant.DistanceToApplicant(IApplicant)"/>
+        /// <returns>List of pairs, each containing two parents</returns>
+        public static List<(IApplicant, IApplicant)> PickOUTBREEDING(in List<IApplicant> population, int minDistance = MinDistance)
         {
-            int pairCount = population.Count / 2;
-            var pairs = new List<(IApplicant First, IApplicant Second)>(pairCount);
+            int pairsCount = population.Count / 2;
+            var pairs = new List<(IApplicant, IApplicant)>(pairsCount);
 
             List<int> availableIndices = [.. Enumerable.Range(0, population.Count)];
 
-            for (int i = 0; i < pairCount; i++)
+            for (int i = 0; i < pairsCount; i++)
             {
                 int firstIndex = Tools.Random.Next(0, availableIndices.Count);
                 int firstParentIndex = availableIndices[firstIndex];
@@ -111,11 +127,76 @@ namespace Ega10
         }
 
 
-        public static List<(IApplicant First, IApplicant Second)> PickPOSITIVE(List<IApplicant> population)
+        private static int PopApplicant(ref List<EvaluatedApplicant> evaluatedPopuplaion, ref double populationValue)
         {
-            List<(IApplicant First, IApplicant Second)> parentPairs = [];
+            double xi = Tools.Random.Next(1, (int)populationValue + 1);
+            double sum = 0;
 
-            return parentPairs;
+            for (int i = 0; i < evaluatedPopuplaion.Count; i++)
+            {
+                sum += evaluatedPopuplaion[i].Value;
+
+                if (xi <= sum)
+                {
+                    populationValue -= evaluatedPopuplaion[i].Value;
+                    evaluatedPopuplaion.RemoveAt(i);
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        private static void PrepareEvaluatedPoplationPOSITIVE(ref List<EvaluatedApplicant> evaluatedPopuplaion, ref double populationValue, in List<IApplicant> population, in int applications, in int machines, in int[][] executionTimes, in int[] dueTimes, in int[] penaltyMultiplyers)
+        {
+            for (int i = 0; i < population.Count; i++)
+            {
+                evaluatedPopuplaion.Add(population[i].Evaluate(applications, machines, executionTimes, dueTimes, penaltyMultiplyers));
+            }
+
+            evaluatedPopuplaion.Sort();
+
+            for (int i = 0; i < evaluatedPopuplaion.Count; i++)
+            {
+                evaluatedPopuplaion[i] = new EvaluatedApplicant(evaluatedPopuplaion[i].Genes, evaluatedPopuplaion[^(i + 1)].Value);
+            }
+
+            for (int i = 0; i < evaluatedPopuplaion.Count; i++)
+            {
+                populationValue += evaluatedPopuplaion[i].Value;
+            }
+        }
+
+        /// <summary>
+        /// Picks pairs of parents randomly, weighted by their <see cref="EvaluatedApplicant.Value"/>
+        /// </summary>
+        /// <param name="population">Current population</param>
+        /// <param name="applications">Number of applications</param>
+        /// <param name="machines">Number of machines</param>
+        /// <param name="executionTimes">Execution times of each application</param>
+        /// <param name="dueTimes">Due times of each application</param>
+        /// <param name="penaltyMultiplyers">Penalty multiplyers of each application</param>
+        /// <returns>List of pairs, each containing two parents</returns>
+        public static List<(IApplicant, IApplicant)> PickPOSITIVE(in List<IApplicant> population, in int applications, in int machines, in int[][] executionTimes, in int[] dueTimes, in int[] penaltyMultiplyers)
+        {
+            int pairsCount = population.Count / 2;
+            var pairs = new List<(IApplicant, IApplicant)>(pairsCount);
+
+            var evaluatedPopuplaion = new List<EvaluatedApplicant>(population.Count);
+            double populationValue = 0;
+
+            PrepareEvaluatedPoplationPOSITIVE(ref evaluatedPopuplaion, ref populationValue, population, applications, machines, executionTimes, dueTimes, penaltyMultiplyers);
+
+            for (int i = 0; i < pairsCount; i++)
+            {
+                int firstParentIndex = PopApplicant(ref evaluatedPopuplaion, ref populationValue);
+
+                int secondParentIndex = PopApplicant(ref evaluatedPopuplaion, ref populationValue);
+
+                pairs.Add((population[firstParentIndex], population[secondParentIndex]));
+            }
+
+            return pairs;
         }
     }
 }

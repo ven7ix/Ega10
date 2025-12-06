@@ -1,6 +1,4 @@
-﻿using static Ega10.Tools;
-
-namespace Ega10
+﻿namespace Ega10
 {
     internal static class Solution
     {
@@ -22,53 +20,12 @@ namespace Ega10
         private static EvaluatedApplicant Best { get; set; } = new([], int.MaxValue);
 
 
-        public static void PrintInitialConditions(int applications, int machines, int[][] executionTimes, int[] dueTimes, int[] penaltyMultiplyers)
+        public static void SolveSameBest(Func<int[], IApplicant> applicantFactory, int maxIterations)
         {
-            Console.Clear();
+            PrintInitialConditions();
+            GenerateInitialPopulation(applicantFactory);
 
-            Console.WriteLine($"Applications: {applications}");
-            Console.WriteLine($"Machines: {machines}");
-
-            Console.WriteLine("Execution times:");
-            for (int m = 0; m < executionTimes.Length; m++)
-            {
-                for (int a = 0; a < executionTimes[m].Length; a++)
-                {
-                    Console.Write($"{(executionTimes[m][a] < 10 ? ' ' : string.Empty)}{executionTimes[m][a]} ");
-                }
-                Console.WriteLine();
-            }
-            Console.WriteLine();
-
-            Console.Write("Due times: ");
-            for (int d = 0; d < dueTimes.Length; d++)
-            {
-                Console.Write($"{dueTimes[d]} ");
-            }
-            Console.WriteLine();
-
-            Console.Write("Penalty multiplyers: ");
-            for (int p = 0; p < penaltyMultiplyers.Length; p++)
-            {
-                Console.Write($"{penaltyMultiplyers[p]} ");
-            }
-            Console.WriteLine();
-
-            Console.WriteLine("---------------------------------------------------------------------");
-        }
-
-        public static void Solve()
-        {
-            PrintInitialConditions(Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers);
-
-            static IApplicant applicantFactory(int[] genes)
-            {
-                return new ApplicantCyclic(genes);
-            }
-
-            Population = InitialPopulation.GenerateHEURISTICS(applicantFactory, PopulationSize, Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers);
-            
-            for (int i = 0, iterationsWithSameBest = 0; i < 1000 && iterationsWithSameBest < 1000; i++, iterationsWithSameBest++) //2
+            for (int iterationsWithSameBest = 0; iterationsWithSameBest < maxIterations; iterationsWithSameBest++)
             {
                 if (Population.Count < 1)
                     break;
@@ -82,13 +39,134 @@ namespace Ega10
                     iterationsWithSameBest = 0;
                 }
 
-                List<(IApplicant First, IApplicant Second)> pairs = Parents.PickINBREEDING(Population);
-                List<IApplicant> children = Crossover.CrossoverPairs(pairs);
-                List<IApplicant> mutatedChildren = Mutation.MutateCOMPLEMENT(children);
-                List<IApplicant> applicants = HandlingRestrictions.MODIFY(mutatedChildren, applicantFactory);
-                List<EvaluatedApplicant> evaluatedApplicants = Evaluation.EvaluatePENALTY(applicants, Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers);
-                Population = NewPopulation.GenerateBESTCHILDREN(evaluatedApplicants, PopulationSize, applicantFactory);
+                Population = GenerateNewPopulation(applicantFactory);
             }
+        }
+
+
+        public static void SolveMaxIterarions(Func<int[], IApplicant> applicantFactory, int maxIterations)
+        {
+            PrintInitialConditions();
+            GenerateInitialPopulation(applicantFactory);
+
+            for (int i = 0; i < maxIterations; i++)
+            {
+                if (Population.Count < 1)
+                    break;
+
+                EvaluatedApplicant currentApplicant = Population[0].Evaluate(Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers);
+
+                if (currentApplicant.Value < Best.Value)
+                {
+                    Best = currentApplicant;
+                    Console.WriteLine(Best);
+                }
+
+                Population = GenerateNewPopulation(applicantFactory);
+            }
+        }
+
+
+        private static int GetPopulationDiversity(List<IApplicant> population)
+        {
+            int diversity = 0;
+
+            for (int i = 0; i < population.Count; i++)
+            {
+                for (int j = 0; j < population.Count; j++)
+                {
+                    diversity += population[i].DistanceToApplicant(population[j]);
+                }
+            }
+
+            return diversity;
+        }
+
+        public static void SolveGeneticDiversity(Func<int[], IApplicant> applicantFactory, double geneticDiversity, int checkDelay)
+        {
+            PrintInitialConditions();
+            GenerateInitialPopulation(applicantFactory);
+
+            double diversityRandom = 0;
+            diversityRandom = GetPopulationDiversity(InitialPopulation.GenerateRANDOMCONTROL(applicantFactory, PopulationSize, Applications));
+
+            for (int i = 0; ; i++)
+            {
+                if (i % checkDelay == 0)
+                {
+                    if (GetPopulationDiversity(Population) / diversityRandom < geneticDiversity)
+                        break;
+                }
+
+                if (Population.Count < 1)
+                    break;
+
+                EvaluatedApplicant currentApplicant = Population[0].Evaluate(Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers);
+
+                if (currentApplicant.Value < Best.Value)
+                {
+                    Best = currentApplicant;
+                    Console.WriteLine(Best);
+                }
+
+                Population = GenerateNewPopulation(applicantFactory);
+            }
+        }
+
+
+        private static void PrintInitialConditions()
+        {
+            Console.Clear();
+
+            Console.WriteLine($"Applications: {Applications}");
+            Console.WriteLine($"Machines: {Machines}");
+
+            Console.WriteLine("Execution times:");
+            for (int m = 0; m < ExecutionTimes.Length; m++)
+            {
+                for (int a = 0; a < ExecutionTimes[m].Length; a++)
+                {
+                    Console.Write($"{(ExecutionTimes[m][a] < 10 ? ' ' : string.Empty)}{ExecutionTimes[m][a]} ");
+                }
+                Console.WriteLine();
+            }
+            Console.WriteLine();
+
+            Console.Write("Due times: ");
+            for (int d = 0; d < DueTimes.Length; d++)
+            {
+                Console.Write($"{DueTimes[d]} ");
+            }
+            Console.WriteLine();
+
+            Console.Write("Penalty multiplyers: ");
+            for (int p = 0; p < PenaltyMultiplyers.Length; p++)
+            {
+                Console.Write($"{PenaltyMultiplyers[p]} ");
+            }
+            Console.WriteLine();
+
+            Console.WriteLine("---------------------------------------------------------------------");
+        }
+
+        private static void GenerateInitialPopulation(Func<int[], IApplicant> applicantFactory)
+        {
+            Population = InitialPopulation.GenerateHEURISTIC(applicantFactory, PopulationSize, Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers);
+        }
+
+        private static List<IApplicant> GenerateNewPopulation(Func<int[], IApplicant> applicantFactory)
+        {
+            return 
+                NewPopulation.Generate(
+                    Selection.EvaluateChildren(
+                        HandlingRestrictions.DECODE(
+                            Mutation.MutateCOMPLEMENT(
+                                Crossover.CrossoverPairs(
+                                    Parents.PickPairsRANDOM(Population)),
+                                2, 3), 
+                            applicantFactory), 
+                        PopulationSize, Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers), 
+                    applicantFactory);
         }
     }
 }

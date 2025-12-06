@@ -1,70 +1,113 @@
-﻿using static Ega10.Tools;
-
-namespace Ega10
+﻿namespace Ega10
 {
     internal static class Mutation //3
     {
-        public static List<IApplicant> MutateDONT(List<IApplicant> children)
+        /// <summary>
+        /// Does not alter <paramref name="children"/>
+        /// </summary>
+        /// <param name="children">Children</param>
+        /// <returns><paramref name="children"/></returns>
+        public static List<IApplicant> MutateDONT(in List<IApplicant> children)
         {
             return children;
         }
 
-        public static List<IApplicant> MutateRANDOMCONTOL(List<IApplicant> children)
+        /// <summary>
+        /// Mutates <paramref name="children"/> randomly, but in a controlled manner. Cannot generate invalid permutations
+        /// </summary>
+        /// <param name="children">Children</param>
+        /// <returns>Mutated children</returns>
+        public static List<IApplicant> MutateRANDOMCONTOL(in List<IApplicant> children, int childMutationChance, int genMutationChance)
         {
-            List<IApplicant> mutatedChildren = [];
+            int childrenCount = children.Count;
+            var mutatedChildren = new List<IApplicant>(childrenCount);
 
-            foreach (IApplicant child in children)
+            for (int i = 0; i < childrenCount; i++)
             {
-                int genMutations = Tools.Random.Next(0, child.Genes.Length);
+                if (Tools.Random.Next(0, childMutationChance) != 0)
+                    continue;
 
-                for (int m = 0; m < genMutations; m++)
+                int genesCount = children[i].Genes.Length;
+
+                for (int gen = 0; gen < genesCount; gen++)
                 {
-                    int gen1 = Tools.Random.Next(0, child.Genes.Length);
-                    int gen2 = Tools.Random.Next(0, child.Genes.Length);
+                    if (Tools.Random.Next(0, genMutationChance) != 0)
+                        continue;
 
-                    (child.Genes[gen1], child.Genes[gen2]) = (child.Genes[gen2], child.Genes[gen1]);
+                    int gen1 = Tools.Random.Next(0, genesCount);
+                    int gen2 = Tools.Random.Next(0, genesCount);
+
+                    (children[i].Genes[gen1], children[i].Genes[gen2]) = (children[i].Genes[gen2], children[i].Genes[gen1]);
                 }
 
-                mutatedChildren.Add(child);
+                mutatedChildren.Add(children[i]);
             }
 
             return mutatedChildren;
         }
 
-        public static List<IApplicant> MutateRANDOM(List<IApplicant> children)
+        /// <summary>
+        /// Completely randomly mutates <paramref name="children"/>
+        /// </summary>
+        /// <param name="children">Children</param>
+        /// <returns>Completely randomly mutated <paramref name="children"/></returns>
+        public static List<IApplicant> MutateRANDOM(in List<IApplicant> children, int childMutationChance, int genMutationChance)
         {
-            List<IApplicant> mutatedChildren = [];
+            int childrenCount = children.Count;
+            var mutatedChildren = new List<IApplicant>(childrenCount);
 
-            foreach (IApplicant child in children)
+            for (int i = 0; i < childrenCount; i++)
             {
-                int genMutations = Tools.Random.Next(0, child.Genes.Length);
+                if (Tools.Random.Next(0, childMutationChance) != 0)
+                    continue;
 
-                for (int m = 0; m < genMutations; m++)
+                int genesCount = children[i].Genes.Length;
+
+                for (int gen = 0; gen < genesCount; gen++)
                 {
-                    int mutatedGen = Tools.Random.Next(0, child.Genes.Length);
+                    if (Tools.Random.Next(0, genMutationChance) != 0)
+                        continue;
 
-                    child.Genes[mutatedGen] = child.Genes[Tools.Random.Next(0, child.Genes.Length)];
+                    int mutatedGen = Tools.Random.Next(0, genesCount);
+                    children[i].Genes[mutatedGen] = children[i].Genes[Tools.Random.Next(0, genesCount)];
                 }
 
-                mutatedChildren.Add(child);
+                mutatedChildren.Add(children[i]);
             }
 
             return mutatedChildren;
         }
 
-        public static List<IApplicant> MutateCOMPLEMENT(List<IApplicant> children)
+        /// <summary>
+        /// Mutates <paramref name="children"/> genes by changing their value to complement
+        /// </summary>
+        /// <param name="children">Children</param>
+        /// <returns>Mutated by complementary <paramref name="children"/></returns>
+        public static List<IApplicant> MutateCOMPLEMENT(in List<IApplicant> children, int childMutationChance, int genMutationChance)
         {
-            List<IApplicant> mutatedChildren = [];
-            
-            foreach (IApplicant child in children)
-            {
-                for (int gen = 0; gen < child.Genes.Length; gen++)
-                {
-                    if (Tools.Random.Next(0, 2) == 0)
-                        child.Genes[gen] = child.Genes.Length - 1 - child.Genes[gen];
+            int childrenCount = children.Count;
+            var mutatedChildren = new List<IApplicant>(childrenCount);
 
-                    mutatedChildren.Add(child);
+            for (int i = 0; i < childrenCount; i++)
+            {
+                if (Tools.Random.Next(0, childMutationChance) != 0)
+                {
+                    continue;
                 }
+
+                int genesCount = children[i].Genes.Length;
+
+                for (int gen = 0; gen < genesCount; gen++)
+                {
+                    if (Tools.Random.Next(0, genMutationChance) != 0)
+                    {
+                        continue;
+                    }
+
+                    children[i].Genes[gen] = genesCount - 1 - children[i].Genes[gen];
+                }
+
+                mutatedChildren.Add(children[i]);
             }
 
             return mutatedChildren;

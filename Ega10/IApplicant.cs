@@ -20,6 +20,13 @@ namespace Ega10
             }
         }
 
+        /// <summary>
+        /// Determines the distance between two applicants by finding the difference in their corresponding genes
+        /// </summary>
+        /// <param name="applicant">Other applicant</param>
+        /// <returns>Distance between two applicants</returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="Exception"></exception>
         int DistanceToApplicant(IApplicant applicant)
         {
             if (GetType() != applicant.GetType())
@@ -28,7 +35,7 @@ namespace Ega10
             }
             else if (Genes.Length != applicant.Genes.Length)
             {
-                throw new ArgumentException("Cant find distance due to different Genes lengths");
+                throw new Exception("Cant find distance due to different Genes lengths");
             }
 
             int distance = 0;
@@ -41,6 +48,11 @@ namespace Ega10
             return distance;
         }
 
+        /// <summary>
+        /// Makes crossover between <see cref="this"/> applicant and a <paramref name="partner"/>. Each struct implements this in its own way
+        /// </summary>
+        /// <param name="partner">Partner to cross with</param>
+        /// <returns>List of children who do not equal their parents</returns>
         List<IApplicant> CrossoverWith(IApplicant partner);
 
         EvaluatedApplicant Evaluate(int applications, int machines, int[][] executionTimes, int[] dueTimes, int[] penaltyMultiplyers)
@@ -189,7 +201,7 @@ namespace Ega10
         {
             get
             {
-                int[] genes = GetDecodedGenes();
+                int[] genes = Decode(Genes);
 
                 for (int i = 0; i < genes.Length; i++)
                 {
@@ -322,60 +334,71 @@ namespace Ega10
             return children;
         }
 
-
-        private static int[] Encode(int[] permutationValues)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="genes"></param>
+        /// <returns></returns>
+        public static int[] Encode(in int[] genes)
         {
-            int permutationLength = permutationValues.Length;
+            int genesCount = genes.Length;
 
-            Dictionary<int, int> permutation = new(permutationLength);
+            var genesCopy = new Dictionary<int, int>(genesCount);
+            int[] encodedGenes = new int[genesCount];
 
-            Dictionary<int, int> basePermutation = new(permutationLength); //0 through n - 1 mapped to 0 through n - 1
-            int[] encodedPermutation = new int[permutationLength];
+            var basePermutation = new Dictionary<int, int>(genesCount); //0 through n - 1 mapped to 0 through n - 1
 
-            for (int i = 0; i < permutationLength; i++)
+            for (int i = 0; i < genesCount; i++)
             {
-                permutation[i] = permutationValues[i];
+                genesCopy[i] = genes[i];
                 basePermutation[i] = i;
             }
 
-            for (int i = 0; i < permutationLength; i++)
+            for (int i = 0; i < genesCount; i++)
             {
-                encodedPermutation[i] = basePermutation[permutation[i]];
-                basePermutation[permutation[i]] = -1;
+                encodedGenes[i] = basePermutation[genesCopy[i]];
+                basePermutation[genesCopy[i]] = -1;
 
-                for (int j = 0, k = 0; j < permutationLength; j++)
+                for (int j = 0, k = 0; j < genesCount; j++)
                 {
-                    if (basePermutation[j] != basePermutation[permutation[i]])
+                    if (basePermutation[j] != basePermutation[genesCopy[i]])
                     {
                         basePermutation[j] = k++;
                     }
                 }
             }
 
-            return encodedPermutation;
+            return encodedGenes;
         }
 
-        private static int[] Decode(int[] encodedPermutation)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="encodedGenes"></param>
+        /// <returns></returns>
+        public static int[] Decode(in int[] encodedGenes)
         {
-            int permutationLength = encodedPermutation.Length;
+            int genesCount = encodedGenes.Length;
 
-            int[] decodedPermutation = new int[permutationLength];
+            int[] encodedGenesCopy = new int[genesCount];
+            Array.Copy(encodedGenes, encodedGenesCopy, genesCount);
+            int[] genes = new int[genesCount];
 
-            Dictionary<int, int> basePermutation = new(permutationLength); //0 through n - 1 mapped to 0 through n - 1
+            var basePermutation = new Dictionary<int, int>(genesCount); //0 through n - 1 mapped to 0 through n - 1
 
-            for (int i = 0; i < permutationLength; i++)
+            for (int i = 0; i < genesCount; i++)
             {
                 basePermutation[i] = i;
             }
 
-            for (int i = 0; i < permutationLength; i++)
+            for (int i = 0; i < genesCount; i++)
             {
-                int key = basePermutation.FirstOrDefault(pair => pair.Value == encodedPermutation[i]).Key;
+                int key = basePermutation.FirstOrDefault(pair => pair.Value == encodedGenesCopy[i]).Key;
 
-                decodedPermutation[i] = key;
+                genes[i] = key;
                 basePermutation[key] = -1;
 
-                for (int j = 0, k = 0; j < permutationLength; j++)
+                for (int j = 0, k = 0; j < genesCount; j++)
                 {
                     if (basePermutation[j] != basePermutation[key])
                     {
@@ -384,17 +407,12 @@ namespace Ega10
                 }
             }
 
-            return decodedPermutation;
-        }
-
-        public readonly int[] GetDecodedGenes()
-        {
-            return Decode(Genes);
+            return genes;
         }
 
         public readonly EvaluatedApplicant Evaluate(int applications, int machines, int[][] executionTimes, int[] dueTimes, int[] penaltyMultiplyers)
         {
-            int[] decodedGenes = GetDecodedGenes();
+            int[] decodedGenes = Decode(Genes);
 
             int[] machineTimes = new int[machines];
             int totalPenalty = 0;
@@ -468,10 +486,5 @@ namespace Ega10
 
             throw new ArgumentException("Inccorect type comparason");
         }
-    }
-
-    internal static class Tools
-    {
-        public static Random Random { get; } = new(0);
     }
 }

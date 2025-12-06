@@ -1,7 +1,4 @@
-﻿using System;
-using static Ega10.Tools;
-
-namespace Ega10
+﻿namespace Ega10
 {
     internal static class InitialPopulation //6
     {
@@ -17,11 +14,18 @@ namespace Ega10
             return genes;
         }
 
-        public static List<IApplicant> GenerateRANDOM(Func<int[], IApplicant> applicantFactory, int populationCount, int genesCount)
+        /// <summary>
+        /// Generates completly random applicant's genes. Works like trash with <see cref="ApplicantOrdinal"/>
+        /// </summary>
+        /// <param name="applicantFactory">How applicants will be created</param>
+        /// <param name="populationSize">Size of population</param>
+        /// <param name="genesCount">Number of genes of each applicant</param>
+        /// <returns>Starting population</returns>
+        public static List<IApplicant> GenerateRANDOM(Func<int[], IApplicant> applicantFactory, int populationSize, int genesCount)
         {
             List<IApplicant> initialPopulation = [];
 
-            for (int i = 0; i < populationCount; i++)
+            for (int i = 0; i < populationSize; i++)
             {
                 IApplicant applicant = applicantFactory(GenerateGenesRandom(genesCount));
                 initialPopulation.Add(applicant);
@@ -30,12 +34,18 @@ namespace Ega10
             return initialPopulation;
         }
 
-
-        public static List<IApplicant> GenerateRANDOMCONTROL(Func<int[], IApplicant> applicantFactory, int populationCount, int genesCount)
+        /// <summary>
+        /// Generates random, but controlled applicant's genes. Always generates valid permutation, represented by applicant's genes
+        /// </summary>
+        /// <param name="applicantFactory">How applicants will be created</param>
+        /// <param name="populationSize">Size of population</param>
+        /// <param name="genesCount">Number of genes of each applicant</param>
+        /// <returns>Starting population</returns>
+        public static List<IApplicant> GenerateRANDOMCONTROL(Func<int[], IApplicant> applicantFactory, int populationSize, int genesCount)
         {
             List<IApplicant> initialPopulation = [];
 
-            for (int i = 0; i < populationCount; i++)
+            for (int i = 0; i < populationSize; i++)
             {
                 List<int> genesIndices = [.. Enumerable.Range(0, genesCount)];
                 int[] genes = new int[genesCount];
@@ -145,7 +155,18 @@ namespace Ega10
             return applicantFactory(applicationsPermutation);
         }
 
-        public static List<IApplicant> GenerateHEURISTICS(Func<int[], IApplicant> applicantFactory, int populationCount, int applications, int machines, int[][] executionTimes, int[] dueTimes, int[] penaltyMultiplyers)
+        /// <summary>
+        /// Generates initial population based on a heuristic algorithm
+        /// </summary>
+        /// <param name="applicantFactory">How applicants will be created</param>
+        /// <param name="populationSize">Size of population</param>
+        /// <param name="applications">Number of applications and Number of genes of each applicant</param>
+        /// <param name="machines">Number of machines</param>
+        /// <param name="executionTimes">Execution times of each application</param>
+        /// <param name="dueTimes">Due times of each application</param>
+        /// <param name="penaltyMultiplyers">Penalty multiplyers of each application</param>
+        /// <returns>Starting population</returns>
+        public static List<IApplicant> GenerateHEURISTIC(Func<int[], IApplicant> applicantFactory, int populationSize, int applications, int machines, int[][] executionTimes, int[] dueTimes, int[] penaltyMultiplyers)
         {
             List<IApplicant> initialPopulation = [];
 
@@ -154,7 +175,7 @@ namespace Ega10
 
             GenerateOrdering(ordering, ref orderingSum, applications, machines, executionTimes, dueTimes, penaltyMultiplyers);
 
-            for (int i = 0; i < populationCount; i++)
+            for (int i = 0; i < populationSize; i++)
             {
                 initialPopulation.Add(GenerateApplicant(applicantFactory, ordering, orderingSum, applications, machines, executionTimes, dueTimes, penaltyMultiplyers));
             }
