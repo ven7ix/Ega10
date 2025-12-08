@@ -1,172 +1,160 @@
 ﻿namespace Ega10
 {
-    internal static class Solution
+    internal class Solution(ProblemConditions problemConditions, int populationSize)
     {
-        private static int Applications { get; } = 15;
-        private static int Machines { get; } = 5;
-        private static int[] PenaltyMultiplyers { get; } = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-        private static int[][] ExecutionTimes { get; } =
-            [
-            [ 3, 13,  7, 15,  5,  5,  3, 17, 13,  3,  1,  3,  4,  4,  9],
-            [23,  9, 11,  8, 11, 22, 10, 15,  4,  6,  5,  5,  7,  9, 10],
-            [ 7, 21,  9,  9,  7, 23,  6,  2,  8, 23, 23, 16,  1, 11,  6],
-            [ 4, 15,  1,  1, 12,  1,  7, 24, 19, 24,  9, 12, 20, 11,  6],
-            [ 5, 16,  1, 17, 23,  5,  7,  9,  4, 16, 22, 20, 16, 22,  2]
-            ];
-        private static int[] DueTimes { get; } = [20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90];
+        private List<IChromosome> Population { get; set; } = new List<IChromosome>(populationSize);
+        private EvaluatedChromosome Best { get; set; } = new EvaluatedChromosome([], int.MaxValue);
 
-        private static int PopulationSize { get; } = 200;
-        private static List<IApplicant> Population { get; set; } = [];
-        private static EvaluatedApplicant Best { get; set; } = new([], int.MaxValue);
-
-
-        public static void SolveSameBest(Func<int[], IApplicant> applicantFactory, int maxIterations)
-        {
-            PrintInitialConditions();
-            GenerateInitialPopulation(applicantFactory);
-
-            for (int iterationsWithSameBest = 0; iterationsWithSameBest < maxIterations; iterationsWithSameBest++)
-            {
-                if (Population.Count < 1)
-                    break;
-
-                EvaluatedApplicant currentApplicant = Population[0].Evaluate(Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers);
-
-                if (currentApplicant.Value < Best.Value)
-                {
-                    Best = currentApplicant;
-                    Console.WriteLine(Best);
-                    iterationsWithSameBest = 0;
-                }
-
-                GenerateNewPopulation(applicantFactory);
-            }
-        }
-
-
-        public static void SolveMaxIterarions(Func<int[], IApplicant> applicantFactory, int maxIterations)
-        {
-            PrintInitialConditions();
-            GenerateInitialPopulation(applicantFactory);
-
-            for (int i = 0; i < maxIterations; i++)
-            {
-                if (Population.Count < 1)
-                    break;
-
-                EvaluatedApplicant currentApplicant = Population[0].Evaluate(Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers);
-
-                if (currentApplicant.Value < Best.Value)
-                {
-                    Best = currentApplicant;
-                    Console.WriteLine(Best);
-                }
-
-                GenerateNewPopulation(applicantFactory);
-            }
-        }
-
-
-        private static int GetPopulationDiversity(List<IApplicant> population)
-        {
-            int diversity = 0;
-
-            for (int i = 0; i < population.Count; i++)
-            {
-                for (int j = 0; j < population.Count; j++)
-                {
-                    diversity += population[i].DistanceToApplicant(population[j]);
-                }
-            }
-
-            return diversity;
-        }
-
-        public static void SolveGeneticDiversity(Func<int[], IApplicant> applicantFactory, double geneticDiversity, int checkDelay)
-        {
-            PrintInitialConditions();
-            GenerateInitialPopulation(applicantFactory);
-
-            double diversityRandom = 0;
-            diversityRandom = GetPopulationDiversity(InitialPopulation.GenerateRANDOMCONTROL(applicantFactory, PopulationSize, Applications));
-
-            for (int i = 0; ; i++)
-            {
-                if (i % checkDelay == 0)
-                {
-                    if (GetPopulationDiversity(Population) / diversityRandom < geneticDiversity)
-                        break;
-                }
-
-                if (Population.Count < 1)
-                    break;
-
-                EvaluatedApplicant currentApplicant = Population[0].Evaluate(Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers);
-
-                if (currentApplicant.Value < Best.Value)
-                {
-                    Best = currentApplicant;
-                    Console.WriteLine(Best);
-                }
-
-                GenerateNewPopulation(applicantFactory);
-            }
-        }
-
-
-        private static void PrintInitialConditions()
+        private void PrintInitialConditions()
         {
             Console.Clear();
 
-            Console.WriteLine($"Applications: {Applications}");
-            Console.WriteLine($"Machines: {Machines}");
+            Console.WriteLine($"Applications: {problemConditions.Applications}");
+            Console.WriteLine($"Machines: {problemConditions.Machines}");
 
             Console.WriteLine("Execution times:");
-            for (int m = 0; m < ExecutionTimes.Length; m++)
+            for (int m = 0; m < problemConditions.ExecutionTimes.Length; m++)
             {
-                for (int a = 0; a < ExecutionTimes[m].Length; a++)
+                for (int a = 0; a < problemConditions.ExecutionTimes[m].Length; a++)
                 {
-                    Console.Write($"{(ExecutionTimes[m][a] < 10 ? ' ' : string.Empty)}{ExecutionTimes[m][a]} ");
+                    Console.Write($"{(problemConditions.ExecutionTimes[m][a] < 10 ? ' ' : string.Empty)}{problemConditions.ExecutionTimes[m][a]} ");
                 }
                 Console.WriteLine();
             }
             Console.WriteLine();
 
             Console.Write("Due times: ");
-            for (int d = 0; d < DueTimes.Length; d++)
+            for (int d = 0; d < problemConditions.DueTimes.Length; d++)
             {
-                Console.Write($"{DueTimes[d]} ");
+                Console.Write($"{problemConditions.DueTimes[d]} ");
             }
             Console.WriteLine();
 
             Console.Write("Penalty multiplyers: ");
-            for (int p = 0; p < PenaltyMultiplyers.Length; p++)
+            for (int p = 0; p < problemConditions.PenaltyMultiplyers.Length; p++)
             {
-                Console.Write($"{PenaltyMultiplyers[p]} ");
+                Console.Write($"{problemConditions.PenaltyMultiplyers[p]} ");
             }
             Console.WriteLine();
 
             Console.WriteLine("---------------------------------------------------------------------");
         }
 
-        private static void GenerateInitialPopulation(Func<int[], IApplicant> applicantFactory)
+        private void GenerateNewPopulation(
+            in IChromosomeFactory chromosomeFactory,
+            in IParentPairsSelector parentPairsSelector,
+            in ICrossoverOperator crossoverOperator,
+            in IMutator mutator,
+            in IRestriction restriction,
+            in IEvaluator evaluator,
+            in INewPopulationGenerator newPopulationGenerator)
         {
-            Population = InitialPopulation.GenerateHEURISTIC(applicantFactory, PopulationSize, Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers);
+            var children =
+                evaluator.EvaluateChromosomes(
+                    restriction.Apply(
+                        mutator.Mutate(
+                            crossoverOperator.CrossoverPairs(
+                                parentPairsSelector.Select(Population)))), populationSize, problemConditions);
+
+            Population = newPopulationGenerator.Generate(children, chromosomeFactory);
         }
 
-        private static void GenerateNewPopulation(Func<int[], IApplicant> applicantFactory)
+
+        public void SolveMaxIterarions(
+            in IChromosomeFactory chromosomeFactory,
+            in IInitialPopalionGenerator initialPopalionGenerator,
+            in IParentPairsSelector parentPairsSelector,
+            in ICrossoverOperator crossoverOperator,
+            in IMutator mutator,
+            in IRestriction restriction,
+            in IEvaluator evaluator,
+            in INewPopulationGenerator newPopulationGenerator,
+            int maxIterations)
         {
-            Population =
-                NewPopulation.Generate(
-                    Selection.EvaluateChildren(
-                        HandlingRestrictions.DECODE(
-                            Mutation.MutateCOMPLEMENT(
-                                Crossover.CrossoverPairs(
-                                    Parents.PickPairsRANDOM(Population)),
-                                5, 10),
-                           applicantFactory),
-                        PopulationSize, Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers), 
-                    applicantFactory);
+            PrintInitialConditions();
+
+            Population = initialPopalionGenerator.Generate(chromosomeFactory, populationSize, problemConditions.Applications);
+
+            for (int i = 0; i < maxIterations && Population.Count > 0; i++)
+            {
+                EvaluatedChromosome currentApplicant = evaluator.EvaluateChromosome(Population[0], problemConditions);
+
+                if (currentApplicant.Value < Best.Value)
+                {
+                    Best = currentApplicant;
+                    Console.WriteLine(Best);
+                }
+
+                GenerateNewPopulation(chromosomeFactory, parentPairsSelector, crossoverOperator, mutator, restriction, evaluator, newPopulationGenerator);
+            }
+        }
+
+        public void SolveSameBest(
+            in IChromosomeFactory chromosomeFactory,
+            in IInitialPopalionGenerator initialPopalionGenerator,
+            in IParentPairsSelector parentPairsSelector,
+            in ICrossoverOperator crossoverOperator,
+            in IMutator mutator,
+            in IRestriction restriction,
+            in IEvaluator evaluator,
+            in INewPopulationGenerator newPopulationGenerator,
+            int maxIterations)
+        {
+            PrintInitialConditions();
+
+            Population = initialPopalionGenerator.Generate(chromosomeFactory, populationSize, problemConditions.Applications);
+
+            for (int i = 0; i < maxIterations && Population.Count > 0; i++)
+            {
+                EvaluatedChromosome currentApplicant = evaluator.EvaluateChromosome(Population[0], problemConditions);
+
+                if (currentApplicant.Value < Best.Value)
+                {
+                    i = 0;
+                    Best = currentApplicant;
+                    Console.WriteLine(Best);
+                }
+
+                GenerateNewPopulation(chromosomeFactory, parentPairsSelector, crossoverOperator, mutator, restriction, evaluator, newPopulationGenerator);
+            }
+        }
+
+        public void SolveGeneticDiversity(
+            in IChromosomeFactory chromosomeFactory,
+            in IInitialPopalionGenerator initialPopalionGenerator,
+            in IParentPairsSelector parentPairsSelector,
+            in ICrossoverOperator crossoverOperator,
+            in IMutator mutator,
+            in IRestriction restriction,
+            in IEvaluator evaluator,
+            in INewPopulationGenerator newPopulationGenerator,
+            double geneticDiversity, int checkDelay)
+        {
+            PrintInitialConditions();
+
+            var initialPopuationRandom = new RandomControlledInitialPopalionGenerator();
+            double diversityRandom = ChromosomeOperations.ChromosomesDiversity(initialPopuationRandom.Generate(chromosomeFactory, populationSize, problemConditions.Applications));
+            
+            Population = initialPopalionGenerator.Generate(chromosomeFactory, populationSize, problemConditions.Applications);
+
+            for (int i = 0; Population.Count > 0; i++)
+            {
+                if (i % checkDelay == 0)
+                {
+                    if (ChromosomeOperations.ChromosomesDiversity(Population) / diversityRandom < geneticDiversity)
+                        break;
+                }
+
+                EvaluatedChromosome currentApplicant = evaluator.EvaluateChromosome(Population[0], problemConditions);
+
+                if (currentApplicant.Value < Best.Value)
+                {
+                    Best = currentApplicant;
+                    Console.WriteLine(Best);
+                }
+
+                GenerateNewPopulation(chromosomeFactory, parentPairsSelector, crossoverOperator, mutator, restriction, evaluator, newPopulationGenerator);
+            }
         }
     }
 }
