@@ -5,7 +5,7 @@
         List<IChromosome> Generate(in List<EvaluatedChromosome> evaluatedChromosomes, in IChromosomeFactory chromosomeFactory);
     }
 
-    internal class DefaultNewPopulationGenerator : INewPopulationGenerator
+    internal class NewPopulationGeneratorDefault : INewPopulationGenerator
     {
         public List<IChromosome> Generate(in List<EvaluatedChromosome> evaluatedChromosomes, in IChromosomeFactory chromosomeFactory)
         {

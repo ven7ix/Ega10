@@ -2,29 +2,29 @@
 {
     internal interface IParentPairsSelector
     {
-        List<(IChromosome, IChromosome)> Select(in List<IChromosome> population);
+        List<(IChromosome, IChromosome)> Select(in List<IChromosome> chromosomes);
     }
 
     internal class ParentPairsSelectorRandom : IParentPairsSelector
     {
-        public List<(IChromosome, IChromosome)> Select(in List<IChromosome> population)
+        public List<(IChromosome, IChromosome)> Select(in List<IChromosome> chromosomes)
         {
-            int pairsCount = population.Count / 2;
+            int pairsCount = chromosomes.Count / 2;
             var pairs = new List<(IChromosome, IChromosome)>(pairsCount);
 
-            List<int> availableIndices = [.. Enumerable.Range(0, population.Count)];
+            List<int> availableIndices = [.. Enumerable.Range(0, chromosomes.Count)];
 
             for (int i = 0; i < pairsCount; i++)
             {
-                int firstIndex = Tools.Random.Next(0, availableIndices.Count);
-                int firstParentIndex = availableIndices[firstIndex];
-                availableIndices.RemoveAt(firstIndex);
+                int index1 = Tools.Random.Next(0, availableIndices.Count);
+                int parentIndex1 = availableIndices[index1];
+                availableIndices.RemoveAt(index1);
 
-                int secondIndex = Tools.Random.Next(0, availableIndices.Count);
-                int secondParentIndex = availableIndices[secondIndex];
-                availableIndices.RemoveAt(secondIndex);
+                int index2 = Tools.Random.Next(0, availableIndices.Count);
+                int parentIndex2 = availableIndices[index2];
+                availableIndices.RemoveAt(index2);
 
-                pairs.Add((population[firstParentIndex], population[secondParentIndex]));
+                pairs.Add((chromosomes[parentIndex1], chromosomes[parentIndex2]));
             }
 
             return pairs;
@@ -33,40 +33,40 @@
 
     internal class ParentPairsSelectorInbreeding(int maxDistance) : IParentPairsSelector
     {
-        private IChromosome GetPartnerInbreeding(in List<IChromosome> population, List<int> availableIndices, in IChromosome firstParent)
+        private IChromosome GetPartnerInbreeding(in List<IChromosome> chromosomes, List<int> availableIndices, in IChromosome parent1)
         {
             int index = Tools.Random.Next(0, availableIndices.Count);
             int parterIndex = availableIndices[index];
-            IChromosome partner = population[parterIndex];
+            IChromosome partner = chromosomes[parterIndex];
 
             for (; index < availableIndices.Count; index++)
             {
                 parterIndex = availableIndices[index];
 
-                if (ChromosomeOperations.DistanceBetweenChromosomes(firstParent, population[parterIndex]) < maxDistance)
+                if (ChromosomeOperations.DistanceBetweenChromosomes(parent1, chromosomes[parterIndex]) < maxDistance)
                 {
                     availableIndices.RemoveAt(index);
-                    return population[parterIndex];
+                    return chromosomes[parterIndex];
                 }
             }
 
             return partner;
         }
 
-        public List<(IChromosome, IChromosome)> Select(in List<IChromosome> population)
+        public List<(IChromosome, IChromosome)> Select(in List<IChromosome> chromosomes)
         {
-            int pairsCount = population.Count / 2;
+            int pairsCount = chromosomes.Count / 2;
             var pairs = new List<(IChromosome, IChromosome)>(pairsCount);
 
-            List<int> availableIndices = [.. Enumerable.Range(0, population.Count)];
+            List<int> availableIndices = [.. Enumerable.Range(0, chromosomes.Count)];
 
             for (int i = 0; i < pairsCount; i++)
             {
-                int firstIndex = Tools.Random.Next(0, availableIndices.Count);
-                int firstParentIndex = availableIndices[firstIndex];
-                availableIndices.RemoveAt(firstIndex);
+                int index1 = Tools.Random.Next(0, availableIndices.Count);
+                int parentIndex1 = availableIndices[index1];
+                availableIndices.RemoveAt(index1);
 
-                pairs.Add((population[firstParentIndex], GetPartnerInbreeding(population, availableIndices, population[firstParentIndex])));
+                pairs.Add((chromosomes[parentIndex1], GetPartnerInbreeding(chromosomes, availableIndices, chromosomes[parentIndex1])));
             }
 
             return pairs;
@@ -75,40 +75,40 @@
 
     internal class ParentPairsSelectorOutbreeding(int minDistance) : IParentPairsSelector
     {
-        private IChromosome GetPartnerOutbreeding(in List<IChromosome> population, List<int> availableIndices, in IChromosome firstParent)
+        private IChromosome GetPartnerOutbreeding(in List<IChromosome> chromosomes, List<int> availableIndices, in IChromosome parent1)
         {
             int index = Tools.Random.Next(0, availableIndices.Count);
             int parterIndex = availableIndices[index];
-            IChromosome partner = population[parterIndex];
+            IChromosome partner = chromosomes[parterIndex];
 
             for (; index < availableIndices.Count; index++)
             {
                 parterIndex = availableIndices[index];
 
-                if (ChromosomeOperations.DistanceBetweenChromosomes(firstParent, population[parterIndex]) > minDistance)
+                if (ChromosomeOperations.DistanceBetweenChromosomes(parent1, chromosomes[parterIndex]) > minDistance)
                 {
                     availableIndices.RemoveAt(index);
-                    return population[parterIndex];
+                    return chromosomes[parterIndex];
                 }
             }
 
             return partner;
         }
 
-        public List<(IChromosome, IChromosome)> Select(in List<IChromosome> population)
+        public List<(IChromosome, IChromosome)> Select(in List<IChromosome> chromosomes)
         {
-            int pairsCount = population.Count / 2;
+            int pairsCount = chromosomes.Count / 2;
             var pairs = new List<(IChromosome, IChromosome)>(pairsCount);
 
-            List<int> availableIndices = [.. Enumerable.Range(0, population.Count)];
+            List<int> availableIndices = [.. Enumerable.Range(0, chromosomes.Count)];
 
             for (int i = 0; i < pairsCount; i++)
             {
-                int firstIndex = Tools.Random.Next(0, availableIndices.Count);
-                int firstParentIndex = availableIndices[firstIndex];
-                availableIndices.RemoveAt(firstIndex);
+                int index1 = Tools.Random.Next(0, availableIndices.Count);
+                int parentIndex1 = availableIndices[index1];
+                availableIndices.RemoveAt(index1);
 
-                pairs.Add((population[firstParentIndex], GetPartnerOutbreeding(population, availableIndices, population[firstParentIndex])));
+                pairs.Add((chromosomes[parentIndex1], GetPartnerOutbreeding(chromosomes, availableIndices, chromosomes[parentIndex1])));
             }
 
             return pairs;
@@ -137,23 +137,23 @@
             return -1;
         }
 
-        private void PrepareEvaluatedPoplationPositive(in List<EvaluatedChromosome> evaluatedPopuplaion, ref double populationValue, in List<IChromosome> population)
+        private void PrepareEvaluatedPoplationPositive(in List<EvaluatedChromosome> evaluatedChromosomes, ref double populationValue, in List<IChromosome> chromosomes)
         {
-            for (int i = 0; i < population.Count; i++)
+            for (int i = 0; i < chromosomes.Count; i++)
             {
-                evaluatedPopuplaion.Add(evaluator.EvaluateChromosome(population[i], problemConditions));
+                evaluatedChromosomes.Add(evaluator.EvaluateChromosome(chromosomes[i], problemConditions));
             }
 
-            evaluatedPopuplaion.Sort();
+            evaluatedChromosomes.Sort();
 
-            for (int i = 0; i < evaluatedPopuplaion.Count; i++)
+            for (int i = 0; i < evaluatedChromosomes.Count; i++)
             {
-                evaluatedPopuplaion[i] = new EvaluatedChromosome(evaluatedPopuplaion[i].Genes, evaluatedPopuplaion[^(i + 1)].Value);
+                evaluatedChromosomes[i] = new EvaluatedChromosome(evaluatedChromosomes[i].Genes, evaluatedChromosomes[^(i + 1)].Value);
             }
 
-            for (int i = 0; i < evaluatedPopuplaion.Count; i++)
+            for (int i = 0; i < evaluatedChromosomes.Count; i++)
             {
-                populationValue += evaluatedPopuplaion[i].Value;
+                populationValue += evaluatedChromosomes[i].Value;
             }
         }
 
@@ -169,11 +169,11 @@
 
             for (int i = 0; i < pairsCount; i++)
             {
-                int firstParentIndex = PopApplicant(evaluatedPopuplaion, ref populationValue);
+                int parentIndex1 = PopApplicant(evaluatedPopuplaion, ref populationValue);
 
-                int secondParentIndex = PopApplicant(evaluatedPopuplaion, ref populationValue);
+                int parentIndex2 = PopApplicant(evaluatedPopuplaion, ref populationValue);
 
-                pairs.Add((population[firstParentIndex], population[secondParentIndex]));
+                pairs.Add((population[parentIndex1], population[parentIndex2]));
             }
 
             return pairs;

@@ -1,10 +1,8 @@
-﻿using System.Linq;
-
-namespace Ega10
+﻿namespace Ega10
 {
     internal interface ICrossoverOperator
     {
-        protected List<IChromosome> Crossover(in IChromosome firstParent, in IChromosome secondParent);
+        protected List<IChromosome> Crossover(in IChromosome parent1, in IChromosome parent2);
 
         List<IChromosome> CrossoverPairs(in List<(IChromosome, IChromosome)> parentPairs)
         {
@@ -56,20 +54,25 @@ namespace Ega10
             return permutationCycles;
         }
 
-        List<IChromosome> ICrossoverOperator.Crossover(in IChromosome firstParent, in IChromosome secondParent)
+        List<IChromosome> ICrossoverOperator.Crossover(in IChromosome parent1, in IChromosome parent2)
         {
-            List<int[]> permutationCycles = ListAllCycles(firstParent.Genes, secondParent.Genes);
+            if (!(parent1 is CyclicChromosome && parent2 is CyclicChromosome))
+            {
+                throw new Exception();
+            }
+
+            List<int[]> permutationCycles = ListAllCycles(parent1.Genes, parent2.Genes);
 
             int childrenCount = 1 << permutationCycles.Count;
             var children = new List<IChromosome>(childrenCount);
 
             for (int c = 0; c < childrenCount; c++)
             {
-                int[] childGenes = new int[firstParent.Genes.Length];
+                int[] childGenes = new int[parent1.Genes.Length];
 
                 for (int p = 0; p < permutationCycles.Count; p++)
                 {
-                    int[] parentGenes = ((c >> p) & 1) == 1 ? firstParent.Genes : secondParent.Genes;
+                    int[] parentGenes = ((c >> p) & 1) == 1 ? parent1.Genes : parent2.Genes;
 
                     for (int gen = 0; gen < parentGenes.Length; gen++)
                     {
@@ -77,7 +80,7 @@ namespace Ega10
                     }
                 }
 
-                if (childGenes.SequenceEqual(firstParent.Genes) || childGenes.SequenceEqual(secondParent.Genes))
+                if (childGenes.SequenceEqual(parent1.Genes) || childGenes.SequenceEqual(parent2.Genes))
                     continue;
 
                 children.Add(new CyclicChromosome(childGenes));
@@ -106,15 +109,15 @@ namespace Ega10
             return cutPositions;
         }
 
-        private static List<int[]> GenerateCutCombinations(int[] arrayA, int[] arrayB, int[] cuts)
+        private static List<int[]> GenerateCutCombinations(int[] array1, int[] array2, int[] cuts)
         {
-            int arrayLength = arrayA.Length;
+            int arrayLength = array1.Length;
             List<int[]> result = [];
 
             List<int> boundaries = [0, .. cuts.Order(), arrayLength];
 
-            List<int[]> partsA = [];
-            List<int[]> partsB = [];
+            List<int[]> parts1 = [];
+            List<int[]> parts2 = [];
 
             for (int i = 0; i < boundaries.Count - 1; i++)
             {
@@ -122,17 +125,17 @@ namespace Ega10
                 int end = boundaries[i + 1];
                 int length = end - start;
 
-                int[] partA = new int[length];
-                int[] partB = new int[length];
+                int[] part1 = new int[length];
+                int[] part2 = new int[length];
 
-                Array.Copy(arrayA, start, partA, 0, length);
-                Array.Copy(arrayB, start, partB, 0, length);
+                Array.Copy(array1, start, part1, 0, length);
+                Array.Copy(array2, start, part2, 0, length);
 
-                partsA.Add(partA);
-                partsB.Add(partB);
+                parts1.Add(part1);
+                parts2.Add(part2);
             }
 
-            int partsCount = partsA.Count;
+            int partsCount = parts1.Count;
             int totalCombinations = 1 << partsCount;
 
             for (int mask = 0; mask < totalCombinations; mask++)
@@ -141,7 +144,7 @@ namespace Ega10
 
                 for (int partIndex = 0; partIndex < partsCount; partIndex++)
                 {
-                    int[] selectedPart = ((mask >> partIndex) & 1) == 1 ? partsB[partIndex] : partsA[partIndex];
+                    int[] selectedPart = ((mask >> partIndex) & 1) == 1 ? parts2[partIndex] : parts1[partIndex];
                     combination.AddRange(selectedPart);
                 }
 
@@ -151,11 +154,16 @@ namespace Ega10
             return result;
         }
 
-        List<IChromosome> ICrossoverOperator.Crossover(in IChromosome firstParent, in IChromosome secondParent)
+        List<IChromosome> ICrossoverOperator.Crossover(in IChromosome parent1, in IChromosome parent2)
         {
-            int genesAmount = firstParent.Genes.Length;
+            if (!(parent1 is OrdinalChromosome && parent2 is OrdinalChromosome))
+            {
+                throw new Exception();
+            }
 
-            List<int[]> childrenGenes = GenerateCutCombinations(firstParent.Genes, secondParent.Genes, GenerateCuts(genesAmount));
+            int genesAmount = parent1.Genes.Length;
+
+            List<int[]> childrenGenes = GenerateCutCombinations(parent1.Genes, parent2.Genes, GenerateCuts(genesAmount));
 
             List<IChromosome> children = [];
 
@@ -163,7 +171,7 @@ namespace Ega10
             {
                 int[] childGenes = childrenGenes[c];
 
-                if (childGenes.SequenceEqual(firstParent.Genes) || childGenes.SequenceEqual(secondParent.Genes))
+                if (childGenes.SequenceEqual(parent1.Genes) || childGenes.SequenceEqual(parent2.Genes))
                     continue;
 
                 children.Add(new OrdinalChromosome(childGenes, encodeGenes: false));

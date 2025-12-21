@@ -18,7 +18,7 @@
                     continue;
 
                 int genesCount = chromosomes[i].Genes.Length;
-                int[] complementGenes = GetComplementGenes(chromosomes[i].Genes);
+                int[] complementGenes = GetComplementGenes(chromosomes[i]);
 
                 for (int gen = 0; gen < genesCount; gen++)
                 {
@@ -32,7 +32,7 @@
             return chromosomes;
         }
 
-        protected int[] GetComplementGenes(in int[] Genes);
+        protected int[] GetComplementGenes(in IChromosome chromosome);
     }
 
     internal class RandomMutator(double chromosomeMutationChance, double geneMutationChance) : IMutator
@@ -98,13 +98,18 @@
         public double ChromosomeMutationChance { get; } = chromosomeMutationChance;
         public double GeneMutationChance { get; } = geneMutationChance;
 
-        int[] IComplementMutator.GetComplementGenes(in int[] Genes)
+        int[] IComplementMutator.GetComplementGenes(in IChromosome chromosome)
         {
-            int[] genes = new int[Genes.Length];
-
-            for (int i = 0; i < Genes.Length; i++)
+            if (chromosome is not CyclicChromosome)
             {
-                genes[i] = Genes.Length - 1 - Genes[i];
+                throw new Exception();
+            }
+
+            int[] genes = new int[chromosome.Genes.Length];
+
+            for (int i = 0; i < chromosome.Genes.Length; i++)
+            {
+                genes[i] = chromosome.Genes.Length - 1 - chromosome.Genes[i];
             }
 
             return genes;
@@ -116,13 +121,18 @@
         public double ChromosomeMutationChance { get; } = chromosomeMutationChance;
         public double GeneMutationChance { get; } = geneMutationChance;
 
-        int[] IComplementMutator.GetComplementGenes(in int[] Genes)
+        int[] IComplementMutator.GetComplementGenes(in IChromosome chromosome)
         {
-            int[] genes = new int[Genes.Length];
-
-            for (int i = 0; i < Genes.Length; i++)
+            if (chromosome is not OrdinalChromosome)
             {
-                genes[i] = Genes.Length - 1 - i - Genes[i];
+                throw new Exception();
+            }
+
+            int[] genes = new int[chromosome.Genes.Length];
+
+            for (int i = 0; i < chromosome.Genes.Length; i++)
+            {
+                genes[i] = chromosome.Genes.Length - 1 - i - chromosome.Genes[i];
             }
 
             return genes;

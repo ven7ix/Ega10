@@ -23,17 +23,19 @@
         public static void Main()
         {
             var problemConditions = new ProblemConditions(Applications, Machines, ExecutionTimes, DueTimes, PenaltyMultiplyers);
+            problemConditions.Print();
 
-            var solution = new Solution(problemConditions, 200);
+            var solution = new Solution(problemConditions, 200, false);
             solution.SolveMaxIterarions(
                 new CyclicChromosomeFactory(),
-                new RandomInitialPopalionGenerator(new CyclicModifyRestriction(new CyclicChromosomeFactory())),
+                new RandomControlledInitialPopalionGenerator(),
                 new ParentPairsSelectorRandom(),
                 new CyclicCrossoverOperator(),
                 new RandomControlledMutator(0.1f, 0.5f),
                 new CyclicModifyRestriction(new CyclicChromosomeFactory()),
                 new EvaluatorCyclic(),
-                new DefaultNewPopulationGenerator(),
+                new SelectorRandom(0.8f),
+                new NewPopulationGeneratorDefault(),
                 50);
         }
     }

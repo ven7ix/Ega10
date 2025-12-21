@@ -50,6 +50,11 @@
     {
         IChromosome IModifyRestriction.ModifyChromosome(in IChromosome chromosome)
         {
+            if (chromosome is not CyclicChromosome)
+            {
+                throw new Exception();
+            }
+
             int genesCount = chromosome.Genes.Length;
 
             int[] genes = new int[genesCount];

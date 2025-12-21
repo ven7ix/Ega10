@@ -2,9 +2,7 @@
 {
     internal interface IEvaluator
     {
-        EvaluatedChromosome EvaluateChromosome(in IChromosome chromosome, in ProblemConditions problemConditions);
-
-        List<EvaluatedChromosome> EvaluateChromosomes(in List<IChromosome> chromosomes, int populationSize, ProblemConditions problemConditions)
+        List<EvaluatedChromosome> EvaluateChromosomes(in List<IChromosome> chromosomes, in ProblemConditions problemConditions)
         {
             var evaluatedChromosomes = new List<EvaluatedChromosome>(chromosomes.Count);
 
@@ -13,16 +11,21 @@
                 evaluatedChromosomes.Add(EvaluateChromosome(chromosomes[i], problemConditions));
             }
 
-            evaluatedChromosomes.Sort();
-
-            return evaluatedChromosomes.GetRange(0, Math.Min(populationSize, chromosomes.Count));
+            return evaluatedChromosomes;
         }
+
+        EvaluatedChromosome EvaluateChromosome(in IChromosome chromosome, in ProblemConditions problemConditions);
     }
 
     internal class EvaluatorCyclic : IEvaluator
     {
         public EvaluatedChromosome EvaluateChromosome(in IChromosome chromosome, in ProblemConditions problemConditions)
         {
+            if (chromosome is not CyclicChromosome)
+            {
+                throw new Exception();
+            }
+
             int[] machineTimes = new int[problemConditions.Machines];
             int totalPenalty = 0;
 
@@ -56,6 +59,11 @@
     {
         public EvaluatedChromosome EvaluateChromosome(in IChromosome chromosome, in ProblemConditions problemConditions)
         {
+            if (chromosome is not OrdinalChromosome)
+            {
+                throw new Exception();
+            }
+
             int[] decodedGenes = ChromosomeOperations.Decode(chromosome.Genes);
 
             int[] machineTimes = new int[problemConditions.Machines];
