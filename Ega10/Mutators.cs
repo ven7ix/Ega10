@@ -8,7 +8,7 @@
         List<IChromosome> Mutate(in List<IChromosome> chromosomes);
     }
 
-    internal interface IComplementMutator : IMutator
+    internal interface IComplementaryMutator : IMutator
     {
         List<IChromosome> IMutator.Mutate(in List<IChromosome> chromosomes)
         {
@@ -93,12 +93,12 @@
         }
     }
 
-    internal class CyclicComplementMutator(double chromosomeMutationChance, double geneMutationChance) : IComplementMutator
+    internal class CyclicComplementaryMutator(double chromosomeMutationChance, double geneMutationChance) : IComplementaryMutator
     {
         public double ChromosomeMutationChance { get; } = chromosomeMutationChance;
         public double GeneMutationChance { get; } = geneMutationChance;
 
-        int[] IComplementMutator.GetComplementGenes(in IChromosome chromosome)
+        int[] IComplementaryMutator.GetComplementGenes(in IChromosome chromosome)
         {
             if (chromosome is not CyclicChromosome)
             {
@@ -116,12 +116,12 @@
         }
     }
 
-    internal class OrdinalComplementMutator(double chromosomeMutationChance, double geneMutationChance) : IComplementMutator
+    internal class OrdinalComplementaryMutator(double chromosomeMutationChance, double geneMutationChance) : IComplementaryMutator
     {
         public double ChromosomeMutationChance { get; } = chromosomeMutationChance;
         public double GeneMutationChance { get; } = geneMutationChance;
 
-        int[] IComplementMutator.GetComplementGenes(in IChromosome chromosome)
+        int[] IComplementaryMutator.GetComplementGenes(in IChromosome chromosome)
         {
             if (chromosome is not OrdinalChromosome)
             {
