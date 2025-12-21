@@ -1,9 +1,26 @@
 ﻿namespace Ega10
 {
-    internal class Solution(ProblemConditions problemConditions, int populationSize, bool doElite = false)
+    internal class Solution(ProblemConditions problemConditions, int populationSize, bool doElite = false, int printStep = 20)
     {
         private List<IChromosome> Population { get; set; } = new List<IChromosome>(populationSize);
         private EvaluatedChromosome Best { get; set; } = new EvaluatedChromosome([], int.MaxValue);
+
+        private void PrintStep(int step, IEvaluator evaluator)
+        {
+            if (step % printStep != 0)
+                return;
+
+            Console.WriteLine($"STEP: {step}");
+
+            Console.WriteLine($"BEST: {Best}");
+
+            Console.WriteLine("POPULATION:");
+            for (int i = 0; i < Population.Count; i++)
+            {
+                Console.WriteLine(evaluator.EvaluateChromosome(Population[i], problemConditions));
+            }
+            Console.WriteLine();
+        }
 
         private void GenerateNewPopulation(
             in IChromosomeFactory chromosomeFactory,
@@ -63,11 +80,13 @@
                 if (currentApplicant.Value < Best.Value)
                 {
                     Best = currentApplicant;
-                    Console.WriteLine(Best);
                 }
 
+                PrintStep(i, evaluator);
                 GenerateNewPopulation(chromosomeFactory, parentPairsSelector, crossoverOperator, mutator, restriction, evaluator, selector, newPopulationGenerator);
             }
+
+            Console.WriteLine($"BEST: {Best}");
         }
 
         public void SolveSameBest(
@@ -92,11 +111,13 @@
                 {
                     i = 0;
                     Best = currentApplicant;
-                    Console.WriteLine(Best);
                 }
 
+                PrintStep(i, evaluator);
                 GenerateNewPopulation(chromosomeFactory, parentPairsSelector, crossoverOperator, mutator, restriction, evaluator, selector, newPopulationGenerator);
             }
+
+            Console.WriteLine($"BEST: {Best}");
         }
 
         public void SolveGeneticDiversity(
@@ -132,8 +153,11 @@
                     Console.WriteLine(Best);
                 }
 
+                PrintStep(i, evaluator);
                 GenerateNewPopulation(chromosomeFactory, parentPairsSelector, crossoverOperator, mutator, restriction, evaluator, selector, newPopulationGenerator);
             }
+
+            Console.WriteLine($"BEST: {Best}");
         }
     }
 }
