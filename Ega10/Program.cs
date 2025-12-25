@@ -2,7 +2,7 @@
 {
     internal static class Tools
     {
-        public static Random Random { get; } = new Random(0);
+        public static Random Random { get; } = new Random();
     }
 
     internal class Program
@@ -26,17 +26,73 @@
             problemConditions.Print();
 
             var solution = new Solution(problemConditions, 200, false);
-            solution.SolveMaxIterarions(
-                new CyclicChromosomeFactory(),
-                new RandomControlledInitialPopalionGenerator(),
-                new ParentPairsSelectorRandom(),
-                new CyclicCrossoverOperator(),
-                new RandomControlledMutator(0.1f, 0.5f),
-                new CyclicModifyRestriction(new CyclicChromosomeFactory()),
-                new EvaluatorCyclic(),
-                new SelectorRandom(0.8f),
-                new NewPopulationGeneratorDefault(),
-                50);
+            var solutionElite = new Solution(problemConditions, 200, true);
+
+            int choice = 3;
+
+            switch (choice)
+            {
+                case 0:
+                {
+                    solution.SolveMaxIterarions(
+                        new CyclicChromosomeFactory(),
+                        new RandomControlledInitialPopalionGenerator(),
+                        new ParentPairsSelectorRandom(),
+                        new CyclicCrossoverOperator(),
+                        new RandomControlledMutator(0.1f, 0.5f),
+                        new CyclicModifyRestriction(new CyclicChromosomeFactory()),
+                        new EvaluatorCyclic(),
+                        new SelectorRandom(0.8f),
+                        new NewPopulationGeneratorDefault(),
+                        50);
+                    break;
+                }
+                case 1:
+                {
+                    solution.SolveMaxIterarions(
+                        new OrdinalChromosomeFactory(true),
+                        new HeuristicInitialPopalionGenerator(problemConditions),
+                        new ParentPairsSelectorOutbreeding(40),
+                        new OrdinalCrossoverOperator(),
+                        new RandomControlledMutator(0.1f, 0.5f),
+                        new EliminateRestriction(),
+                        new EvaluatorOrdinal(),
+                        new SelectorRandom(0.9f),
+                        new NewPopulationGeneratorDefault(),
+                        2000);
+                    break;
+                }
+                case 2:
+                {
+                    solutionElite.SolveMaxIterarions(
+                        new CyclicChromosomeFactory(),
+                        new HeuristicInitialPopalionGenerator(problemConditions),
+                        new ParentPairsSelectorInbreeding(50),
+                        new CyclicCrossoverOperator(),
+                        new CyclicComplementaryMutator(0.05f, 0.4f),
+                        new CyclicModifyRestriction(new CyclicChromosomeFactory()),
+                        new EvaluatorCyclic(),
+                        new SelectorRandom(0.75f),
+                        new NewPopulationGeneratorDefault(),
+                        50);
+                    break;
+                }
+                case 3:
+                {
+                    solutionElite.SolveMaxIterarions(
+                        new OrdinalChromosomeFactory(true),
+                        new RandomControlledInitialPopalionGenerator(),
+                        new ParentPairsSelectorRandom(),
+                        new OrdinalCrossoverOperator(),
+                        new RandomControlledMutator(0.05f, 0.3f),
+                        new EliminateRestriction(),
+                        new EvaluatorOrdinal(),
+                        new SelectorBetaTournament(2),
+                        new NewPopulationGeneratorDefault(),
+                        50);
+                    break;
+                }
+            }
         }
     }
 }

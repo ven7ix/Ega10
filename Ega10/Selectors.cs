@@ -63,7 +63,7 @@
 
             selectedChromosomes.Sort();
 
-            return selectedChromosomes.GetRange(0, Math.Min(populationSize, evaluatedChromosomes.Count));
+            return selectedChromosomes.GetRange(0, Math.Min(populationSize, selectedChromosomes.Count));
         }
     }
 }

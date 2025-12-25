@@ -60,7 +60,7 @@
         }
     }
 
-    internal class HueristicInitialPopalionGenerator(ProblemConditions problemConditions) : IInitialPopalionGenerator
+    internal class HeuristicInitialPopalionGenerator(ProblemConditions problemConditions) : IInitialPopalionGenerator
     {
         private void GenerateOrdering(in IndexValuePair[] ordering, ref double orderingSum)
         {
